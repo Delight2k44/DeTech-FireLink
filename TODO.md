@@ -1,15 +1,12 @@
-# Task Progress: Insert DETECH picture 1.jpg into Hardware R&D card
+# TODO - DeTech FireLink update
 
-## Steps from Approved Plan:
-- [x] Step 1: Edit index.html to replace placeholder img src="img/prototype.jpg" with "images/DETECH picture 1.jpg" in Hardware R&D card
-- [x] Step 2: Verify image displays correctly (user to refresh page)
-- [x] Step 3: Update Community Impact Visits card img src="img/community.jpg" to "images/community.jpg"
-- [x] Step 4: Verify and refresh page
+## Goal
+Integrate the provided raw `index.html` (with popup + gated site) into the Next.js app under `firelink/`.
 
-## Additional Updates
-- [x] Fire Department Collaboration card: Updated img src to "images/fire station.jpg" (Phase 03)
-
-All research card images updated. Refresh page to verify.
-
-
+## Steps
+- [ ] Create `firelink/public/images/` and copy existing `images/*` assets so the page can load them via `/images/...`.
+- [ ] Replace `firelink/app/page.tsx` with a client component version of the provided HTML (popup + main site) so Firebase/form logic runs.
+- [ ] Ensure any Next.js/React quirks are handled (no duplicate `<html>/<body>`, correct JS execution in client side).
+- [ ] Start dev server and verify the popup + localStorage gating works.
+- [ ] Fix any runtime/build errors that appear.
 
