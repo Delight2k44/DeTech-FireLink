@@ -4,114 +4,412 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeTech | Fire-Link Lite</title>
+
+    <!-- Google Tag -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMRY72HKGC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-DMRY72HKGC');
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDKs (CDN) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAM8SIm4DIi800D-Apa2SgfPpHVh-hrjUc",
+            authDomain: "website-791e9.firebaseapp.com",
+            projectId: "website-791e9",
+            storageBucket: "website-791e9.firebasestorage.app",
+            messagingSenderId: "35656723392",
+            appId: "1:35656723392:web:dd4447685537af9a32f625",
+            measurementId: "G-DMRY72HKGC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        window.__db = db;
+        window.__firestore = { collection, addDoc, query, where, getDocs };
+        window.__firebaseReady = true;
+        document.dispatchEvent(new Event('firebaseReady'));
+    </script>
+
     <style>
         * { font-family: 'Inter', sans-serif; }
-        
-        /* Hero Background with Gradient Overlay */
-       .hero-bg {
-    background: 
-        linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(20, 10, 0, 0.6)),
-        url('images/DETECH.JPG');
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-        /* Animated gradient text */
+
+        /* ── OVERLAY SYSTEM ── */
+        #gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        #gate-overlay.hidden { display: none; }
+
+        /* Popup card */
+        .popup-card {
+            background: linear-gradient(135deg, #111 0%, #1a0a0a 100%);
+            border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 1.5rem;
+            max-width: 560px; width: 100%;
+            box-shadow: 0 0 80px rgba(239,68,68,0.15), 0 40px 80px rgba(0,0,0,0.6);
+            overflow: hidden;
+            animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity:0; transform: scale(0.85) translateY(20px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+
+        /* Step transitions */
+        .step { display: none; }
+        .step.active { display: block; animation: fadeStep 0.4s ease forwards; }
+        @keyframes fadeStep {
+            from { opacity:0; transform: translateX(20px); }
+            to   { opacity:1; transform: translateX(0); }
+        }
+
+        /* Form inputs */
+        .form-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, background 0.2s;
+            outline: none;
+        }
+        .form-input:focus { border-color: rgba(239,68,68,0.6); background: rgba(255,255,255,0.08); }
+        .form-input::placeholder { color: #6b7280; }
+        .form-input.error { border-color: #ef4444; }
+
+        label.form-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #9ca3af;
+            margin-bottom: 0.35rem;
+        }
+        .field-error { font-size: 0.7rem; color: #f87171; margin-top: 0.3rem; }
+
+        /* Submit button */
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 24px rgba(239,68,68,0.3);
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(239,68,68,0.45); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Social buttons */
+        .social-btn {
+            display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 700; font-size: 0.8rem; text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid transparent;
+        }
+        .social-btn:hover { transform: translateY(-2px); }
+        .social-fb   { background: #1877f2; color: #fff; }
+        .social-fb:hover { box-shadow: 0 8px 20px rgba(24,119,242,0.4); }
+        .social-li   { background: #0a66c2; color: #fff; }
+        .social-li:hover { box-shadow: 0 8px 20px rgba(10,102,194,0.4); }
+        .social-wa   { background: #25d366; color: #fff; }
+        .social-wa:hover { box-shadow: 0 8px 20px rgba(37,211,102,0.4); }
+
+        /* Spinner */
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Stat pulse badge */
+        .pulse-dot {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+        }
+        .pulse-dot span.dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #ef4444;
+            position: relative;
+        }
+        .pulse-dot span.dot::after {
+            content: ''; position: absolute; inset: -3px;
+            border-radius: 50%; background: rgba(239,68,68,0.4);
+            animation: ping 1.5s ease-out infinite;
+        }
+        @keyframes ping { 0%{transform:scale(1);opacity:1} 100%{transform:scale(2);opacity:0} }
+
+        /* Hero background */
+        .hero-bg {
+            background:
+                linear-gradient(135deg, rgba(0,0,0,0.72), rgba(20,5,0,0.62)),
+                url('images/DETECH.JPG');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Gradient text */
         .gradient-text {
             background: linear-gradient(90deg, #ef4444, #f87171, #ef4444);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: gradient-shift 3s ease infinite;
+            animation: grad 3s ease infinite;
+        }
+        @keyframes grad {
+            0%,100%{background-position:0% center}
+            50%{background-position:100% center}
         }
 
-        @keyframes gradient-shift {
-            0%, 100% { background-position: 0% center; }
-            50% { background-position: 100% center; }
-        }
+        html { scroll-behavior: smooth; }
 
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Fade in animation */
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity:0; transform:translateY(20px); }
+            to   { opacity:1; transform:translateY(0); }
         }
+        .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
 
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(239,68,68,0.2); }
 
-        /* Card hover effect */
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* Progress bar (form) */
+        .progress-bar-bg { background: rgba(255,255,255,0.08); border-radius: 9999px; height: 4px; }
+        .progress-bar    { height: 4px; border-radius: 9999px; background: linear-gradient(90deg,#dc2626,#ef4444); transition: width 0.4s ease; }
 
-        .card-hover:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2);
-        }
-
-        /* Glow effect */
-        .glow {
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
+        /* Scroll reveals */
+        .reveal { opacity:0; transform:translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .reveal.visible { opacity:1; transform:translateY(0); }
     </style>
 </head>
 <body class="bg-gray-950 text-white antialiased overflow-x-hidden">
 
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  GATE OVERLAY (Did You Know + Registration + Thank You)    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="gate-overlay">
+    <div class="popup-card">
+
+        <!-- ── STEP 1: Did You Know ── -->
+        <div id="step-dyk" class="step active">
+            <!-- Red accent top bar -->
+            <div class="h-1 w-full bg-gradient-to-r from-red-700 via-red-500 to-orange-500"></div>
+
+            <div class="p-8 sm:p-10">
+                <!-- Badge -->
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="pulse-dot text-xs font-bold uppercase tracking-widest text-red-400">
+                        <span class="dot"></span>
+                        Did You Know?
+                    </span>
+                </div>
+
+                <!-- Headline stat -->
+                <div class="mb-6">
+                    <p class="text-5xl sm:text-6xl font-black text-white leading-none mb-2">
+                        <span class="text-red-500">1 000+</span>
+                    </p>
+                    <p class="text-gray-300 text-lg font-semibold leading-snug">
+                        informal settlement fires are recorded in South Africa every year — and most are preventable.
+                    </p>
+                </div>
+
+                <div class="space-y-3 mb-8 text-sm text-gray-400 leading-relaxed border-l-2 border-red-600/40 pl-4">
+                    <p>Fires in unprotected communities spread <strong class="text-gray-200">3× faster</strong> due to lack of early-warning systems. With offline-capable heat sensors and GPS alerts, DeTech's Fire-Link Lite is designed to bridge this life-or-death gap.</p>
+                    <p>Together we can stop the next disaster <em class="text-red-400">before it starts.</em></p>
+                </div>
+
+                <!-- CTA Button -->
+                <button
+                    id="btn-start-register"
+                    class="btn-primary flex items-center justify-center gap-2"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                    Click to Help Save Lives
+                </button>
+
+                <p class="text-center text-xs text-gray-600 mt-4">Takes less than 60 seconds · Your data is secure</p>
+            </div>
+        </div>
+
+        <!-- ── STEP 2: Registration Form ── -->
+        <div id="step-form" class="step">
+            <div class="h-1 w-full bg-gradient-to-r from-red-700 via-red-500 to-orange-500"></div>
+
+            <div class="p-8 sm:p-10">
+                <!-- Header -->
+                <div class="mb-1 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Join the Movement</p>
+                        <h2 class="text-2xl font-black text-white">Register Your Support</h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider">Step</p>
+                        <p class="text-2xl font-black text-white">2<span class="text-gray-600">/2</span></p>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-bar-bg my-4">
+                    <div class="progress-bar" style="width:100%"></div>
+                </div>
+
+                <!-- Error banner -->
+                <div id="form-error" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm"></div>
+
+                <!-- Form -->
+                <form id="register-form" novalidate>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="form-label">First Name</label>
+                            <input id="f-name" type="text" placeholder="Delight" class="form-input" required>
+                            <p class="field-error hidden" id="err-name">Required</p>
+                        </div>
+                        <div>
+                            <label class="form-label">Surname</label>
+                            <input id="f-surname" type="text" placeholder="Chetter" class="form-input" required>
+                            <p class="field-error hidden" id="err-surname">Required</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="form-label">Age</label>
+                            <input id="f-age" type="number" placeholder="25" min="1" max="120" class="form-input" required>
+                            <p class="field-error hidden" id="err-age">Enter a valid age</p>
+                        </div>
+                        <div>
+                            <label class="form-label">Phone Number</label>
+                            <input id="f-phone" type="tel" placeholder="+27 81 234 5678" class="form-input" required>
+                            <p class="field-error hidden" id="err-phone">Required</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Email Address</label>
+                        <input id="f-email" type="email" placeholder="you@example.com" class="form-input" required>
+                        <p class="field-error hidden" id="err-email">Enter a valid email</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="form-label">Street Address</label>
+                        <input id="f-address" type="text" placeholder="12 Mandela Drive, Bloemfontein" class="form-input" required>
+                        <p class="field-error hidden" id="err-address">Required</p>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="btn-primary flex items-center justify-center gap-2">
+                        <span id="btn-submit-text">Complete Registration</span>
+                        <div id="btn-submit-spinner" class="spinner hidden"></div>
+                    </button>
+                </form>
+
+                <p class="text-center text-xs text-gray-600 mt-4">🔒 Stored securely via Firebase · Never shared</p>
+            </div>
+        </div>
+
+        <!-- ── STEP 3: Thank You ── -->
+        <div id="step-thanks" class="step">
+            <div class="h-1 w-full bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500"></div>
+
+            <div class="p-8 sm:p-10 text-center">
+                <!-- Check animation -->
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(34,197,94,0.4)]">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+
+                <h2 class="text-3xl font-black text-white mb-2">You're In! 🔥</h2>
+                <p id="thanks-name" class="text-gray-400 mb-1">Thank you for supporting DeTech.</p>
+                <p class="text-gray-500 text-sm mb-8">Together we protect communities. Stay connected with us below.</p>
+
+                <!-- Social links -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+                    <a href="https://www.facebook.com/profile.php?id=61561789175601" target="_blank" rel="noopener" class="social-btn social-fb">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+                        Facebook Page
+                    </a>
+                    <a href="https://www.linkedin.com/company/detech-firelink" target="_blank" rel="noopener" class="social-btn social-li">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://chat.whatsapp.com/REPLACE_WITH_YOUR_GROUP_LINK" target="_blank" rel="noopener" class="social-btn social-wa">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        WhatsApp Channel
+                    </a>
+                </div>
+
+                <!-- Enter site button -->
+                <button id="btn-enter-site" class="btn-primary flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
+                    Enter the DeTech Website
+                </button>
+
+                <p class="text-xs text-gray-600 mt-4">You won't see this screen again on this device</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- ═════════════ END GATE OVERLAY ═════════════ -->
+
+
+<!-- ══════════════════════════════════════ -->
+<!--  MAIN SITE (hidden until registered)  -->
+<!-- ══════════════════════════════════════ -->
+<div id="main-site" class="hidden">
+
     <!-- Hero Section -->
     <div class="hero-bg min-h-screen flex flex-col">
-        
-        <!-- Navigation -->
         <nav class="flex items-center justify-between gap-8 px-6 md:px-12 py-6 backdrop-blur-xl bg-black/30 border-b border-white/10 sticky top-0 z-50">
             <div class="text-2xl md:text-3xl font-extrabold tracking-tighter">
                 DE<span class="text-red-500">TECH</span>
             </div>
-
-            <!-- Nav Links and CTA -->
             <div class="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest">
-                <a href="#about" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">
-                    About Us
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="#journey" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">
-                    Our Journey
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="#research" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">
-                    Research
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="#founders" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">
-                    Founders
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span>
-                </a>
-                
-                <!-- CTA Button -->
-                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-8 rounded-lg transition transform hover:scale-105 duration-300 text-xs uppercase tracking-wider">
-                    Get Protected
-                </button>
+                <a href="#about" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">About Us<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span></a>
+                <a href="#journey" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">Our Journey<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span></a>
+                <a href="#research" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">Research<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span></a>
+                <a href="#founders" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">Founders<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span></a>
+                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-8 rounded-lg transition transform hover:scale-105 duration-300 text-xs uppercase tracking-wider">Get Protected</button>
             </div>
         </nav>
 
-        <!-- Hero Content -->
         <main class="flex-grow flex flex-col justify-center items-start px-6 md:px-16 lg:px-20 max-w-6xl py-20">
-            
-            <!-- Live Badge -->
             <div class="fade-in-up inline-flex items-center gap-2 bg-red-600/20 border border-red-500/40 text-red-400 px-4 py-2 rounded-full text-xs font-bold uppercase mb-8 animate-pulse">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -119,157 +417,63 @@
                 </span>
                 Now Live: Fire-Link Lite Solution
             </div>
-
-            <!-- Main Heading -->
-            <h1 class="fade-in-up text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight mb-8" style="animation-delay: 0.1s;">
-                Saving Lives Through<br>
-                <span class="gradient-text">Smarter Detection.</span>
+            <h1 class="fade-in-up text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight mb-8" style="animation-delay:0.1s">
+                Saving Lives Through<br><span class="gradient-text">Smarter Detection.</span>
             </h1>
-
-            <!-- Subheading -->
-            <p class="fade-in-up text-base md:text-lg text-gray-400 max-w-2xl leading-relaxed mb-10" style="animation-delay: 0.2s;">
+            <p class="fade-in-up text-base md:text-lg text-gray-400 max-w-2xl leading-relaxed mb-10" style="animation-delay:0.2s">
                 Empowering vulnerable communities with dual-alert heat sensors and GPS technology. Locally built in South Africa, designed for the world.
             </p>
-
-            <!-- CTA Buttons -->
-            <div class="fade-in-up flex flex-wrap gap-4 mb-16" style="animation-delay: 0.3s;">
-                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-10 rounded-lg transition transform hover:scale-105 shadow-lg shadow-red-900/30 duration-300 text-sm uppercase tracking-wide">
-                    Get Protected
-                </button>
-                <button class="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-3 px-10 rounded-lg transition duration-300 text-sm uppercase tracking-wide">
-                    Watch Demo
-                </button>
+            <div class="fade-in-up flex flex-wrap gap-4 mb-16" style="animation-delay:0.3s">
+                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-10 rounded-lg transition transform hover:scale-105 shadow-lg shadow-red-900/30 duration-300 text-sm uppercase tracking-wide">Get Protected</button>
+                <button class="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-3 px-10 rounded-lg transition duration-300 text-sm uppercase tracking-wide">Watch Demo</button>
             </div>
-
-            <!-- Stats -->
-            <div class="fade-in-up grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 border-t border-white/10 pt-10 w-full" style="animation-delay: 0.4s;">
-                <div class="fade-in-up">
-                    <p class="text-3xl md:text-4xl font-bold text-red-500">1st Place</p>
-                    <p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Telkom Hackathon</p>
-                </div>
-                <div class="fade-in-up">
-                    <p class="text-3xl md:text-4xl font-bold text-red-500">24/7</p>
-                    <p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Offline Monitoring</p>
-                </div>
-                <div class="hidden md:block fade-in-up">
-                    <p class="text-3xl md:text-4xl font-bold text-red-500">Solar</p>
-                    <p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Sustainable Tech</p>
-                </div>
+            <div class="fade-in-up grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 border-t border-white/10 pt-10 w-full" style="animation-delay:0.4s">
+                <div><p class="text-3xl md:text-4xl font-bold text-red-500">1st Place</p><p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Telkom Hackathon</p></div>
+                <div><p class="text-3xl md:text-4xl font-bold text-red-500">24/7</p><p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Offline Monitoring</p></div>
+                <div class="hidden md:block"><p class="text-3xl md:text-4xl font-bold text-red-500">Solar</p><p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Sustainable Tech</p></div>
             </div>
         </main>
     </div>
 
     <!-- About Section -->
     <section id="about" class="py-24 bg-gray-950 overflow-hidden relative">
-        <!-- Ambient background glow -->
         <div class="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center relative z-10">
-            
-            <!-- Interactive Orbital System -->
             <div class="relative flex items-center justify-center h-[400px] sm:h-[500px] lg:h-[600px] group">
-                
-                <!-- Central Core with enhanced effects -->
                 <div class="relative z-20 w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(239,68,68,0.5)] animate-pulse hover:scale-110 transition-transform duration-500 cursor-pointer">
-                    <svg class="w-12 h-12 sm:w-14 sm:h-14 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12 2c-1.1 0-2 .9-2 2 0 .3.1.5.2.7C7.2 6.5 5 9.6 5 13c0 3.9 3.1 7 7 7s7-3.1 7-7c0-3.4-2.2-6.5-5.2-8.3.1-.2.2-.4.2-.7 0-1.1-.9-2-2-2zm0 17c-2.8 0-5-2.2-5-5 0-2.1 1.3-4 3.2-4.8.5-.2.8-.7.8-1.2 0-.6-.4-1.1-.9-1.3C12.6 6.2 14.8 6 17 6.4c-.9 1.8-1 3.8-.3 5.7.2.5.7.9 1.2.9.6 0 1.1-.4 1.3-.9.3-.8.5-1.6.5-2.5 0 2.8-2.2 5-5 5z"/>
-                    </svg>
-                    <!-- Glow layers -->
-                    <div class="absolute inset-0 rounded-full bg-red-500 blur-2xl opacity-40 animate-ping" style="animation-duration: 3s;"></div>
-                    <div class="absolute -inset-4 rounded-full bg-gradient-to-r from-red-400/20 to-red-600/20 blur-xl opacity-60"></div>
+                    <svg class="w-12 h-12 sm:w-14 sm:h-14 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c-1.1 0-2 .9-2 2 0 .3.1.5.2.7C7.2 6.5 5 9.6 5 13c0 3.9 3.1 7 7 7s7-3.1 7-7c0-3.4-2.2-6.5-5.2-8.3.1-.2.2-.4.2-.7 0-1.1-.9-2-2-2zm0 17c-2.8 0-5-2.2-5-5 0-2.1 1.3-4 3.2-4.8.5-.2.8-.7.8-1.2 0-.6-.4-1.1-.9-1.3C12.6 6.2 14.8 6 17 6.4c-.9 1.8-1 3.8-.3 5.7.2.5.7.9 1.2.9.6 0 1.1-.4 1.3-.9.3-.8.5-1.6.5-2.5 0 2.8-2.2 5-5 5z"/></svg>
+                    <div class="absolute inset-0 rounded-full bg-red-500 blur-2xl opacity-40 animate-ping" style="animation-duration:3s"></div>
                 </div>
-
-                <!-- Orbit 1: SDG 11 -->
                 <div class="absolute border border-white/10 rounded-full w-56 h-56 sm:w-72 sm:h-72 animate-[spin_12s_linear_infinite] group-hover:[animation-play-state:paused]">
-                    <div class="absolute -top-5 sm:-top-6 left-1/2 -translate-x-1/2 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-125 transition-transform duration-300 cursor-pointer group/orbit">
-                        <span class="text-[8px] sm:text-[10px] opacity-80">SDG</span>
-                        <span>11</span>
-                        <div class="absolute inset-0 rounded-xl bg-red-500/20 blur-md -z-10"></div>
-                    </div>
+                    <div class="absolute -top-5 sm:-top-6 left-1/2 -translate-x-1/2 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-125 transition-transform duration-300 cursor-pointer"><span class="text-[8px] sm:text-[10px] opacity-80">SDG</span><span>11</span></div>
                 </div>
-
-                <!-- Orbit 2: SDG 9 & 1 -->
                 <div class="absolute border border-white/10 rounded-full w-80 h-80 sm:w-[400px] sm:h-[400px] animate-[spin_20s_linear_infinite_reverse] group-hover:[animation-play-state:paused]">
-                    <div class="absolute top-1/2 -left-6 sm:-left-7 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-700 to-red-900 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30 shadow-[0_0_20px_rgba(185,28,28,0.3)] hover:scale-125 transition-transform duration-300 cursor-pointer group/orbit">
-                        <span class="text-[8px] sm:text-[10px] opacity-80">SDG</span>
-                        <span>9</span>
-                    </div>
-                    <div class="absolute top-1/2 -right-6 sm:-right-7 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30 shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:scale-125 transition-transform duration-300 cursor-pointer group/orbit">
-                        <span class="text-[8px] sm:text-[10px] opacity-80">SDG</span>
-                        <span>1</span>
-                    </div>
+                    <div class="absolute top-1/2 -left-6 sm:-left-7 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-700 to-red-900 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30"><span class="text-[8px] sm:text-[10px] opacity-80">SDG</span><span>9</span></div>
+                    <div class="absolute top-1/2 -right-6 sm:-right-7 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30"><span class="text-[8px] sm:text-[10px] opacity-80">SDG</span><span>1</span></div>
                 </div>
-
-                <!-- Orbit 3: SDG 3 (Dashed) -->
                 <div class="absolute border-2 border-dashed border-white/10 rounded-full w-[340px] h-[340px] sm:w-[480px] sm:h-[480px] animate-[spin_30s_linear_infinite] group-hover:[animation-play-state:paused]">
-                    <div class="absolute bottom-10 sm:bottom-16 left-1/4 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-125 transition-transform duration-300 cursor-pointer group/orbit">
-                        <span class="text-[8px] sm:text-[10px] opacity-80">SDG</span>
-                        <span>3</span>
-                    </div>
+                    <div class="absolute bottom-10 sm:bottom-16 left-1/4 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold text-center p-1 border border-white/30"><span class="text-[8px] sm:text-[10px] opacity-80">SDG</span><span>3</span></div>
                 </div>
-
-                <!-- Decorative particles -->
-                <div class="absolute w-2 h-2 bg-red-400 rounded-full top-1/4 left-1/4 animate-pulse"></div>
-                <div class="absolute w-1.5 h-1.5 bg-red-400 rounded-full bottom-1/3 right-1/4 animate-pulse" style="animation-delay: 0.5s;"></div>
-                <div class="absolute w-1 h-1 bg-white/50 rounded-full top-1/3 right-1/3 animate-pulse" style="animation-delay: 1s;"></div>
             </div>
-
-            <!-- Content Section -->
             <div class="space-y-6 sm:space-y-8">
                 <div class="inline-block border-l-4 border-red-600 pl-4 sm:pl-6 relative">
                     <div class="absolute -left-1 top-0 bottom-0 w-1 bg-gradient-to-b from-red-400 to-red-700 rounded-full"></div>
                     <h2 class="text-xs sm:text-sm uppercase tracking-[0.25em] text-red-500 font-bold mb-2">Who We Are</h2>
-                    <p class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
-                        Engineering Safety for the <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600 italic">Unprotected.</span>
-                    </p>
+                    <p class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">Engineering Safety for the <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600 italic">Unprotected.</span></p>
                 </div>
-
                 <div class="space-y-4 sm:space-y-6">
-                    <p class="text-gray-400 text-base sm:text-lg leading-relaxed">
-                        Founded at the <strong class="text-gray-200 hover:text-red-400 transition-colors duration-300">Central University of Technology (CUT)</strong>, DeTech was born from a simple but urgent question: <em class="text-gray-300">"How do we stop fire disasters before they destroy lives?"</em>
-                    </p>
-
-                    <p class="text-gray-400 text-base sm:text-lg leading-relaxed">
-                        <span class="text-white font-semibold">Delight Chetter</span> and <span class="text-white font-semibold">Kabelo Makhetha</span> joined forces to create <strong class="text-red-500">Fire-Link Lite</strong>. We aren't just building gadgets; we are solving global challenges. By centering our innovation around the <span class="text-red-400">United Nations Sustainable Development Goals (SDGs)</span>, we ensure our tech creates resilient cities and protects the most vulnerable among us.
-                    </p>
+                    <p class="text-gray-400 text-base sm:text-lg leading-relaxed">Founded at the <strong class="text-gray-200">Central University of Technology (CUT)</strong>, DeTech was born from a simple but urgent question: <em class="text-gray-300">"How do we stop fire disasters before they destroy lives?"</em></p>
+                    <p class="text-gray-400 text-base sm:text-lg leading-relaxed"><span class="text-white font-semibold">Delight Chetter</span> and <span class="text-white font-semibold">Kabelo Makhetha</span> joined forces to create <strong class="text-red-500">Fire-Link Lite</strong>. We aren't just building gadgets; we are solving global challenges aligned to the <span class="text-red-400">UN Sustainable Development Goals.</span></p>
                 </div>
-
-                <!-- Mission/Vision Cards with hover effects -->
                 <div class="grid sm:grid-cols-2 gap-4 sm:gap-6 pt-4">
                     <div class="group bg-gradient-to-br from-white/5 to-white/[0.02] p-5 sm:p-6 rounded-2xl border border-white/10 hover:border-red-500/50 hover:bg-white/[0.08] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-15px_rgba(239,68,68,0.3)]">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                </svg>
-                            </div>
-                            <h4 class="text-red-500 font-bold text-lg">Our Mission</h4>
-                        </div>
+                        <div class="flex items-center gap-3 mb-3"><div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><h4 class="text-red-500 font-bold text-lg">Our Mission</h4></div>
                         <p class="text-sm sm:text-base text-gray-300 leading-relaxed">To bridge the detection gap in underserved areas with affordable, life-saving technology.</p>
                     </div>
-                    
                     <div class="group bg-gradient-to-br from-white/5 to-white/[0.02] p-5 sm:p-6 rounded-2xl border border-white/10 hover:border-red-500/50 hover:bg-white/[0.08] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-15px_rgba(239,68,68,0.3)]">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </div>
-                            <h4 class="text-red-500 font-bold text-lg">Our Vision</h4>
-                        </div>
+                        <div class="flex items-center gap-3 mb-3"><div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></div><h4 class="text-red-500 font-bold text-lg">Our Vision</h4></div>
                         <p class="text-sm sm:text-base text-gray-300 leading-relaxed">A world where fire disasters no longer claim lives or livelihoods through early detection.</p>
                     </div>
-                </div>
-
-                <!-- Optional CTA -->
-                <div class="pt-4">
-                    <button class="group inline-flex items-center gap-2 text-red-500 font-semibold hover:text-red-400 transition-colors duration-300">
-                        Learn more about our impact
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                        </svg>
-                    </button>
                 </div>
             </div>
         </div>
@@ -277,889 +481,358 @@
 
     <!-- Journey Section -->
     <section id="journey" class="py-24 bg-black relative overflow-hidden">
-        <!-- Background ambient effects -->
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
-        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
-            <div class="text-center mb-20 reveal-on-scroll opacity-0 translate-y-8 transition-all duration-700">
-                <div class="inline-block mb-4">
-                    <span class="text-red-500 font-bold tracking-[0.3em] uppercase text-xs sm:text-sm border border-red-500/30 px-4 py-2 rounded-full bg-red-500/5 backdrop-blur-sm">
-                        Evolution
-                    </span>
-                </div>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
-                    The Road to <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">Impact.</span>
-                </h2>
+            <div class="text-center mb-20 reveal opacity-0 translate-y-8 transition-all duration-700">
+                <span class="text-red-500 font-bold tracking-[0.3em] uppercase text-xs sm:text-sm border border-red-500/30 px-4 py-2 rounded-full bg-red-500/5 backdrop-blur-sm">Evolution</span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mt-4">The Road to <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">Impact.</span></h2>
                 <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-red-700 mx-auto mt-6 rounded-full"></div>
             </div>
-
             <div class="relative max-w-4xl mx-auto">
-                
-                <!-- Animated Timeline Line -->
-                <div class="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-1 h-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm">
-                    <div class="w-full bg-gradient-to-b from-red-500 via-red-600 to-red-700 shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all duration-700 ease-out origin-top" data-timeline></div>
+                <div class="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-1 h-full bg-gray-800/50 rounded-full overflow-hidden">
+                    <div class="w-full bg-gradient-to-b from-red-500 via-red-600 to-red-700 shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all duration-700 ease-out origin-top" data-timeline style="height:0%"></div>
                 </div>
-
-                <!-- Ideation -->
-                <div class="relative mb-16 md:mb-24 flex flex-col md:flex-row items-center w-full group timeline-item opacity-0 translate-y-8 transition-all duration-700" data-index="0">
-                    <div class="w-full md:w-[45%] md:text-right md:pr-12 pl-12 md:pl-0 mb-4 md:mb-0">
-                        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-red-500/50 hover:bg-white/[0.08] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-15px_rgba(239,68,68,0.3)]">
-                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Ideation</h3>
-                            <p class="text-gray-400 text-sm sm:text-base leading-relaxed">Where the spark began. The core concept of Fire-Link Lite was born during the intense brainstorming sessions at the Telkom 10X Hackathon.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 border-4 border-black rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(239,68,68,0.5)] group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.8)] transition-all duration-500">
-                        <span class="text-white font-bold text-xs uppercase tracking-wider">1st</span>
-                        <div class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20"></div>
-                    </div>
-                    
-                    <div class="w-full md:w-[45%] md:pl-12 pl-12 md:pl-0 mt-4 md:mt-0">
-                        <span class="inline-block text-red-500 font-bold italic text-sm sm:text-base border-b-2 border-red-500/30 pb-1">Telkom 10X Hackathon</span>
-                        <div class="mt-2 text-gray-500 text-xs uppercase tracking-wider">2023</div>
-                    </div>
+                <!-- Timeline items (same as original) -->
+                <div class="relative mb-16 md:mb-24 flex flex-col md:flex-row items-center w-full group timeline-item reveal opacity-0 translate-y-8 transition-all duration-700" data-index="0">
+                    <div class="w-full md:w-[45%] md:text-right md:pr-12 pl-12 md:pl-0 mb-4 md:mb-0"><div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-red-500/50 transition-all duration-500"><h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Ideation</h3><p class="text-gray-400 text-sm sm:text-base leading-relaxed">Where the spark began. The core concept of Fire-Link Lite was born during the intense brainstorming sessions at the Telkom 10X Hackathon.</p></div></div>
+                    <div class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 border-4 border-black rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(239,68,68,0.5)] group-hover:scale-110 transition-all duration-500"><span class="text-white font-bold text-xs uppercase tracking-wider">1st</span><div class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20"></div></div>
+                    <div class="w-full md:w-[45%] md:pl-12 pl-12 mt-4 md:mt-0"><span class="inline-block text-red-500 font-bold italic text-sm sm:text-base border-b-2 border-red-500/30 pb-1">Telkom 10X Hackathon</span><div class="mt-2 text-gray-500 text-xs uppercase tracking-wider">2023</div></div>
                 </div>
-
-                <!-- Innovation -->
-                <div class="relative mb-16 md:mb-24 flex flex-col md:flex-row-reverse items-center w-full group timeline-item opacity-0 translate-y-8 transition-all duration-700" data-index="1">
-                    <div class="w-full md:w-[45%] md:text-left md:pl-12 pl-12 md:pl-0 mb-4 md:mb-0">
-                        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-red-500/50 hover:bg-white/[0.08] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-15px_rgba(220,38,38,0.3)]">
-                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Innovation</h3>
-                            <p class="text-gray-400 text-sm sm:text-base leading-relaxed">Refining the technology. At the Geekulcha Annual Hackathon, we expanded the technical architecture and integrated our real-time GPS alert logic.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-red-600 to-red-800 border-4 border-black rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(220,38,38,0.5)] group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(220,38,38,0.8)] transition-all duration-500">
-                        <span class="text-white font-bold text-[10px] uppercase tracking-wider">3rd</span>
-                        <div class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20" style="animation-delay: 0.5s;"></div>
-                    </div>
-                    
-                    <div class="w-full md:w-[45%] md:pr-12 pl-12 md:pl-0 text-left md:text-right mt-4 md:mt-0">
-                        <span class="inline-block text-red-500 font-bold italic text-sm sm:text-base border-b-2 border-red-500/30 pb-1">Geekulcha Hackathon</span>
-                        <div class="mt-2 text-gray-500 text-xs uppercase tracking-wider">2023</div>
-                    </div>
+                <div class="relative mb-16 md:mb-24 flex flex-col md:flex-row-reverse items-center w-full group timeline-item reveal opacity-0 translate-y-8 transition-all duration-700" data-index="1">
+                    <div class="w-full md:w-[45%] md:text-left md:pl-12 pl-12 md:pl-0 mb-4 md:mb-0"><div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-red-500/50 transition-all duration-500"><h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Innovation</h3><p class="text-gray-400 text-sm sm:text-base leading-relaxed">Refining the technology. At the Geekulcha Annual Hackathon, we expanded the technical architecture and integrated our real-time GPS alert logic.</p></div></div>
+                    <div class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-red-600 to-red-800 border-4 border-black rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(220,38,38,0.5)] group-hover:scale-110 transition-all duration-500"><span class="text-white font-bold text-[10px] uppercase tracking-wider">3rd</span><div class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20" style="animation-delay:0.5s"></div></div>
+                    <div class="w-full md:w-[45%] md:pr-12 pl-12 text-left md:text-right mt-4 md:mt-0"><span class="inline-block text-red-500 font-bold italic text-sm sm:text-base border-b-2 border-red-500/30 pb-1">Geekulcha Hackathon</span><div class="mt-2 text-gray-500 text-xs uppercase tracking-wider">2023</div></div>
                 </div>
-
-                <!-- Research & Prototype -->
-                <div class="relative flex flex-col md:flex-row items-center w-full group timeline-item opacity-0 translate-y-8 transition-all duration-700" data-index="2">
-                    <div class="w-full md:w-[45%] md:text-right md:pr-12 pl-12 md:pl-0 mb-4 md:mb-0">
-                        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-red-500/50 hover:bg-white/[0.08] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-15px_rgba(239,68,68,0.3)]">
-                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Research & Prototype</h3>
-                            <p class="text-gray-400 text-sm sm:text-base leading-relaxed">Moving to the real world. Under Telkom FutureMakers, we transitioned from code to hardware, building the first heat-sensing physical units.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 border-4 border-black rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(239,68,68,0.5)] group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.8)] transition-all duration-500">
-                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/>
-                        </svg>
-                        <div class="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-20" style="animation-delay: 1s;"></div>
-                    </div>
-                    
-                    <div class="w-full md:w-[45%] md:pl-12 pl-12 md:pl-0 mt-4 md:mt-0">
-                        <span class="inline-block text-red-400 font-bold italic text-sm sm:text-base border-b-2 border-red-400/30 pb-1">Telkom FutureMakers</span>
-                        <div class="mt-2 text-gray-500 text-xs uppercase tracking-wider">2024</div>
-                    </div>
+                <div class="relative flex flex-col md:flex-row items-center w-full group timeline-item reveal opacity-0 translate-y-8 transition-all duration-700" data-index="2">
+                    <div class="w-full md:w-[45%] md:text-right md:pr-12 pl-12 md:pl-0 mb-4 md:mb-0"><div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-red-500/50 transition-all duration-500"><h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Research & Prototype</h3><p class="text-gray-400 text-sm sm:text-base leading-relaxed">Moving to the real world. Under Telkom FutureMakers, we transitioned from code to hardware, building the first heat-sensing physical units.</p></div></div>
+                    <div class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 border-4 border-black rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(239,68,68,0.5)] group-hover:scale-110 transition-all duration-500"><svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/></svg><div class="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-20" style="animation-delay:1s"></div></div>
+                    <div class="w-full md:w-[45%] md:pl-12 pl-12 mt-4 md:mt-0"><span class="inline-block text-red-400 font-bold italic text-sm sm:text-base border-b-2 border-red-400/30 pb-1">Telkom FutureMakers</span><div class="mt-2 text-gray-500 text-xs uppercase tracking-wider">2024</div></div>
                 </div>
-
             </div>
         </div>
-
-        <style>
-            .timeline-item.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            .reveal-on-scroll.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        </style>
-
-        <script>
-            // Intersection Observer for scroll animations
-            const observerOptions = {
-                threshold: 0.2,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const timelineObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        
-                        // Animate timeline progress progressively based on index
-                        const index = parseInt(entry.target.dataset.index);
-                        const timeline = document.querySelector('[data-timeline]');
-                        if (timeline) {
-                            // Calculate height based on which item is visible (33%, 66%, 100%)
-                            const progressHeight = ((index + 1) / 3) * 100;
-                            timeline.style.height = progressHeight + '%';
-                        }
-                    } else {
-                        // Reset when scrolling out of view
-                        entry.target.classList.remove('visible');
-                    }
-                });
-            }, observerOptions);
-
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                timelineObserver.observe(item);
-            });
-
-            // Header animation observer
-            const headerObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    } else {
-                        entry.target.classList.remove('visible');
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-                headerObserver.observe(el);
-            });
-        </script>
     </section>
 
     <!-- Research Section -->
     <section id="research" class="py-24 bg-gray-950 relative overflow-hidden">
-        <!-- Ambient background effects -->
         <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-500/20 to-transparent"></div>
-        <div class="absolute top-1/4 -left-48 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-        <div class="absolute bottom-1/4 -right-48 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
-            <div class="text-center mb-16 reveal-on-scroll opacity-0 translate-y-8 transition-all duration-700">
-                <div class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                    <span class="text-red-500 font-bold tracking-[0.2em] uppercase text-xs">Our Progress</span>
-                </div>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">
-                    Validation in <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 italic">Action.</span>
-                </h2>
+            <div class="text-center mb-16 reveal">
+                <div class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 backdrop-blur-sm"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span><span class="text-red-500 font-bold tracking-[0.2em] uppercase text-xs">Our Progress</span></div>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">Validation in <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 italic">Action.</span></h2>
                 <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-red-700 mx-auto rounded-full"></div>
             </div>
-
             <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
-                
-                <!-- Phase 01: Engineering -->
-                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px60px_-15px_rgba(239,68,68,0.4)] hover:-translate-y-2 research-card opacity-0 translate-y-8">
-                    <div class="relative h-64 sm:h-72 overflow-hidden">
-                        <div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div>
-                        <img src="images/DETECH picture 1.jpg" alt="Assembling DETECH heat-sensing units" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-                        
-                        <!-- Phase badge -->
-                        <div class="absolute top-4 left-4 z-20">
-                            <span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30 shadow-lg">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                Phase 01: Engineering
-                            </span>
-                        </div>
-                        
-                        <!-- Hover icon -->
-                        <div class="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                            <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 sm:p-8 relative">
-                        <!-- Decorative line -->
-                        <div class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
-                        
-                        <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Hardware R&D</h3>
-                        <p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Behind-the-scenes look at assembling our first heat-sensing units. We are focusing on creating a device that is low-cost, durable, and capable of operating offline using solar power.</p>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20 group-hover:bg-red-500/20 transition-colors duration-300">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/>
-                                </svg>
-                                <span>Custom PCB Design</span>
-                            </div>
-                            <span class="text-gray-600 text-xs font-mono">01</span>
-                        </div>
-                    </div>
+                <!-- Phase cards (same as original, shortened for brevity) -->
+                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(239,68,68,0.4)] hover:-translate-y-2 reveal">
+                    <div class="relative h-64 sm:h-72 overflow-hidden"><div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div><img src="images/DETECH picture 1.jpg" alt="Hardware R&D" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div><div class="absolute top-4 left-4 z-20"><span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>Phase 01: Engineering</span></div></div>
+                    <div class="p-6 sm:p-8"><h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Hardware R&D</h3><p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Behind-the-scenes look at assembling our first heat-sensing units. Low-cost, durable, and capable of operating offline using solar power.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20"><span>Custom PCB Design</span></div><span class="text-gray-600 text-xs font-mono">01</span></div></div>
                 </article>
-
-                <!-- Phase 02: Field Work -->
-                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px60px_-15px_rgba(220,38,38,0.4)] hover:-translate-y-2 research-card opacity-0 translate-y-8" style="transition-delay: 100ms;">
-                    <div class="relative h-64 sm:h-72 overflow-hidden">
-                        <div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div>
-                        <img src="images/community.jpg" alt="DETECH Community Impact Visits" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-                        
-                        <div class="absolute top-4 left-4 z-20">
-                            <span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30 shadow-lg">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                Phase 02: Field Work
-                            </span>
-                        </div>
-                        
-                        <div class="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                            <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 sm:p-8 relative">
-                        <div class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
-                        
-                        <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Community Impact Visits</h3>
-                        <p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Innovation happens in the field. We visit local communities to test our alerts and gather feedback from residents to ensure the technology serves their specific safety needs.</p>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20 group-hover:bg-red-500/20 transition-colors duration-300">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                                </svg>
-                                <span>Direct Engagement</span>
-                            </div>
-                            <span class="text-gray-600 text-xs font-mono">02</span>
-                        </div>
-                    </div>
+                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(220,38,38,0.4)] hover:-translate-y-2 reveal" style="transition-delay:100ms">
+                    <div class="relative h-64 sm:h-72 overflow-hidden"><div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div><img src="images/community.jpg" alt="Community Visits" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div><div class="absolute top-4 left-4 z-20"><span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>Phase 02: Field Work</span></div></div>
+                    <div class="p-6 sm:p-8"><h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Community Impact Visits</h3><p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Innovation happens in the field. We visit local communities to test our alerts and gather feedback to ensure the technology serves their specific safety needs.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20"><span>Direct Engagement</span></div><span class="text-gray-600 text-xs font-mono">02</span></div></div>
                 </article>
-
-                <!-- Phase 03: Expert Review -->
-                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px60px_-15px_rgba(239,68,68,0.4)] hover:-translate-y-2 research-card opacity-0 translate-y-8" style="transition-delay: 200ms;">
-                    <div class="relative h-64 sm:h-72 overflow-hidden">
-                        <div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div>
-                        <img src="images/fire station.jpg" alt="DETECH Fire Department Collaboration" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-                        
-                        <div class="absolute top-4 left-4 z-20">
-                            <span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30 shadow-lg">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                Phase 03: Expert Review
-                            </span>
-                        </div>
-                        
-                        <div class="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                            <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 sm:p-8 relative">
-                        <div class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
-                        
-                        <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Fire Department Collaboration</h3>
-                        <p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Meeting with professional firefighting teams to align the DeTech GPS system with official emergency response protocols, ensuring a seamless flow from detection to dispatch.</p>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20 group-hover:bg-red-500/20 transition-colors duration-300">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
-                                </svg>
-                                <span>Protocol Integration</span>
-                            </div>
-                            <span class="text-gray-600 text-xs font-mono">03</span>
-                        </div>
-                    </div>
+                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(239,68,68,0.4)] hover:-translate-y-2 reveal" style="transition-delay:200ms">
+                    <div class="relative h-64 sm:h-72 overflow-hidden"><div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div><img src="images/fire station.jpg" alt="Fire Department" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div><div class="absolute top-4 left-4 z-20"><span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>Phase 03: Expert Review</span></div></div>
+                    <div class="p-6 sm:p-8"><h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Fire Department Collaboration</h3><p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Meeting with professional firefighting teams to align the DeTech GPS system with official emergency response protocols.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20"><span>Protocol Integration</span></div><span class="text-gray-600 text-xs font-mono">03</span></div></div>
                 </article>
-
-                <!-- Phase 04: Education -->
-                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px60px_-15px_rgba(220,38,38,0.4)] hover:-translate-y-2 research-card opacity-0 translate-y-8" style="transition-delay: 300ms;">
-                    <div class="relative h-64 sm:h-72 overflow-hidden">
-                        <div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div>
-                        <img src="img/prevention.jpg" alt="Prevention Planning" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-                        
-                        <div class="absolute top-4 left-4 z-20">
-                            <span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30 shadow-lg">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                Phase 04: Education
-                            </span>
-                        </div>
-                        
-                        <div class="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                            <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 sm:p-8 relative">
-                        <div class="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
-                        
-                        <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Safety Prevention Hub</h3>
-                        <p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Working with fire prevention teams to build our online educational platform. We believe the best fire is the one that never starts—empowering users through knowledge.</p>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20 group-hover:bg-red-500/20 transition-colors duration-300">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
-                                </svg>
-                                <span>Prevention Platform</span>
-                            </div>
-                            <span class="text-gray-600 text-xs font-mono">04</span>
-                        </div>
-                    </div>
+                <article class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(220,38,38,0.4)] hover:-translate-y-2 reveal" style="transition-delay:300ms">
+                    <div class="relative h-64 sm:h-72 overflow-hidden"><div class="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay"></div><img src="images/DETECH.JPG" alt="Prevention Hub" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div><div class="absolute top-4 left-4 z-20"><span class="inline-flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-red-400/30"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>Phase 04: Education</span></div></div>
+                    <div class="p-6 sm:p-8"><h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors duration-300">Safety Prevention Hub</h3><p class="text-gray-400 leading-relaxed mb-6 text-sm sm:text-base">Working with fire prevention teams to build our online educational platform. The best fire is the one that never starts.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-red-500 font-bold text-sm bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20"><span>Prevention Platform</span></div><span class="text-gray-600 text-xs font-mono">04</span></div></div>
                 </article>
-
             </div>
         </div>
-
-        <style>
-            .research-card.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        </style>
-
-        <script>
-            // Intersection Observer for scroll reveal
-            const researchObserverOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const researchObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, researchObserverOptions);
-
-            document.querySelectorAll('.research-card').forEach(card => {
-                researchObserver.observe(card);
-            });
-
-            // Header reveal for research section
-            const researchHeaderObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-                researchHeaderObserver.observe(el);
-            });
-        </script>
-</section>
-    <!-- Founders Section -->
-    <section id="founders" class="py-24 bg-gray-950 relative overflow-hidden">
-        <!-- Ambient background effects -->
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/5 rounded-full blur-[150px] pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-        
-        <!-- Grid pattern overlay -->
-        <div class="absolute inset-0 opacity-[0.02]" style="background-image: linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px); background-size: 50px 50px;"></div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
-            <div class="text-center mb-20 reveal-on-scroll">
-                <div class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                    <span class="text-orange-500 font-bold tracking-[0.2em] uppercase text-xs">Leadership</span>
-                </div>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">
-                    The Minds Behind <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">DeTech.</span>
-                </h2>
-                <div class="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-600 mx-auto rounded-full"></div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
-                
-                <!-- Delight Chetter -->
-                <article class="group relative bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-orange-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(234,88,12,0.3)] hover:-translate-y-2 founder-card opacity-0 translate-y-8">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-tr-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <div class="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start text-center sm:text-left relative">
-                        <div class="relative flex-shrink-0">
-                            <div class="w-36 h-44 sm:w-32 sm:h-40 rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 border-2 border-white/10 group-hover:border-orange-500/50 shadow-2xl relative z-10">
-                                <img src="img/delight.jpg" alt="Delight Chetter" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                            </div>
-                            <div class="absolute inset-0 bg-orange-500/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 -z-10 scale-90"></div>
-                            <div class="absolute -bottom-3 -right-3 bg-gradient-to-br from-orange-500 to-orange-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg border border-orange-400/30 z-20">IT & SEC</div>
-                        </div>
-
-                        <div class="flex-1 space-y-3">
-                            <div>
-                                <h3 class="text-2xl font-bold text-white mb-1 group-hover:text-orange-400 transition-colors duration-300">Delight Chetter</h3>
-                                <p class="text-orange-500/80 text-xs font-bold uppercase tracking-[0.2em] mb-4">Co-Founder | Technical Lead</p>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed">An IT specialist and Cybersecurity enthusiast from CUT. Delight leads the software architecture and PR strategy, ensuring Fire-Link Lite is both secure and scalable.</p>
-                            <div class="flex flex-wrap gap-2 justify-center sm:justify-start pt-2">
-                                <span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Architecture</span>
-                                <span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Security</span>
-                                <span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Strategy</span>
-                            </div>
-                            <div class="flex justify-center sm:justify-start gap-3 pt-4">
-                                <a href="#" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-600 hover:border-orange-600 transition-all duration-300"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
-                                <a href="#" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-600 hover:border-orange-600 transition-all duration-300"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Kabelo Makhetha -->
-                <article class="group relative bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(220,38,38,0.3)] hover:-translate-y-2 founder-card opacity-0 translate-y-8" style="transition-delay: 150ms;">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-red-500/10 to-transparent rounded-tr-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <div class="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start text-center sm:text-left relative">
-                        <div class="relative flex-shrink-0">
-                            <div class="w-36 h-44 sm:w-32 sm:h-40 rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 border-2 border-white/10 group-hover:border-red-500/50 shadow-2xl relative z-10">
-                                <img src="img/kabelo.jpg" alt="Kabelo Makhetha" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                            </div>
-                            <div class="absolute inset-0 bg-red-500/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 -z-10 scale-90"></div>
-                            <div class="absolute -bottom-3 -right-3 bg-gradient-to-br from-red-500 to-red-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg border border-red-400/30 z-20">OPS</div>
-                        </div>
-
-                        <div class="flex-1 space-y-3">
-                            <div>
-                                <h3 class="text-2xl font-bold text-white mb-1 group-hover:text-red-400 transition-colors duration-300">Kabelo Makhetha</h3>
-                                <p class="text-red-500/80 text-xs font-bold uppercase tracking-[0.2em] mb-4">Co-Founder | Strategy Lead</p>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed">A strategic visionary focusing on product evolution and operational excellence. Kabelo ensures that DeTech's mission aligns with community needs and fire safety protocols.</p>
-                            <div class="flex flex-wrap gap-2 justify-center sm:justify-start pt-2">
-                                <span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Operations</span>
-                                <span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Product</span>
-                                <span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Community</span>
-                            </div>
-                            <div class="flex justify-center sm:justify-start gap-3 pt-4">
-                                <a href="#" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all duration-300"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-            </div>
-            
-            <div class="mt-16 flex justify-center">
-                <div class="flex items-center gap-4 text-gray-600 text-xs uppercase tracking-widest">
-                    <span class="w-12 h-px bg-gradient-to-r from-transparent to-gray-700"></span>
-                    <span>Co-founded in 2023</span>
-                    <span class="w-12 h-px bg-gradient-to-l from-transparent to-gray-700"></span>
-                </div>
-            </div>
-        </div>
-
-        <style>
-            .founder-card { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-            .founder-card.visible { opacity: 1; transform: translateY(0); }
-            .reveal-on-scroll { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
-            .reveal-on-scroll.visible { opacity: 1; transform: translateY(0); }
-        </style>
-
-        <script>
-            const founderObserverOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
-            const founderObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) entry.target.classList.add('visible');
-                });
-            }, founderObserverOptions);
-            document.querySelectorAll('.founder-card, .reveal-on-scroll').forEach(el => founderObserver.observe(el));
-        </script>
     </section>
 
-
-<!-- Sponsors Section -->
-    <section id="sponsors" class="py-20 md:py-32 bg-black relative overflow-hidden">
-        <!-- Top gradient border -->
-        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/20 to-transparent"></div>
-        
-        <!-- Background ambient glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-600/5 rounded-full blur-[150px] pointer-events-none"></div>
-        
+    <!-- Founders Section -->
+    <section id="founders" class="py-24 bg-gray-950 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/5 rounded-full blur-[150px] pointer-events-none"></div>
+        <div class="absolute inset-0 opacity-[0.02]" style="background-image:linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);background-size:50px 50px"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
-            <div class="text-center mb-16 reveal-on-scroll">
-                <span class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                    <span class="text-red-500 font-bold tracking-[0.2em] uppercase text-xs">Our Partners</span>
-                </span>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">
-                    Powered by <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 italic">Industry Leaders.</span>
-                </h2>
+            <div class="text-center mb-20 reveal">
+                <div class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20 backdrop-blur-sm"><span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span><span class="text-orange-500 font-bold tracking-[0.2em] uppercase text-xs">Leadership</span></div>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">The Minds Behind <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">DeTech.</span></h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-600 mx-auto rounded-full"></div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+                <article class="group relative bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-orange-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(234,88,12,0.3)] hover:-translate-y-2 reveal">
+                    <div class="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start text-center sm:text-left relative">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-36 h-44 sm:w-32 sm:h-40 rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 border-2 border-white/10 group-hover:border-orange-500/50 shadow-2xl relative z-10"><img src="img/delight.jpg" alt="Delight Chetter" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"></div>
+                            <div class="absolute -bottom-3 -right-3 bg-gradient-to-br from-orange-500 to-orange-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg border border-orange-400/30 z-20">IT & SEC</div>
+                        </div>
+                        <div class="flex-1 space-y-3">
+                            <div><h3 class="text-2xl font-bold text-white mb-1 group-hover:text-orange-400 transition-colors duration-300">Delight Chetter</h3><p class="text-orange-500/80 text-xs font-bold uppercase tracking-[0.2em] mb-4">Co-Founder | Technical Lead</p></div>
+                            <p class="text-gray-400 text-sm leading-relaxed">An IT specialist and Cybersecurity enthusiast from CUT. Delight leads the software architecture and PR strategy, ensuring Fire-Link Lite is both secure and scalable.</p>
+                            <div class="flex flex-wrap gap-2 justify-center sm:justify-start pt-2"><span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Architecture</span><span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Security</span><span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Strategy</span></div>
+                        </div>
+                    </div>
+                </article>
+                <article class="group relative bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-red-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(220,38,38,0.3)] hover:-translate-y-2 reveal" style="transition-delay:150ms">
+                    <div class="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start text-center sm:text-left relative">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-36 h-44 sm:w-32 sm:h-40 rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 border-2 border-white/10 group-hover:border-red-500/50 shadow-2xl relative z-10"><img src="img/kabelo.jpg" alt="Kabelo Makhetha" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"></div>
+                            <div class="absolute -bottom-3 -right-3 bg-gradient-to-br from-red-500 to-red-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg border border-red-400/30 z-20">OPS</div>
+                        </div>
+                        <div class="flex-1 space-y-3">
+                            <div><h3 class="text-2xl font-bold text-white mb-1 group-hover:text-red-400 transition-colors duration-300">Kabelo Makhetha</h3><p class="text-red-500/80 text-xs font-bold uppercase tracking-[0.2em] mb-4">Co-Founder | Strategy Lead</p></div>
+                            <p class="text-gray-400 text-sm leading-relaxed">A strategic visionary focusing on product evolution and operational excellence. Kabelo ensures that DeTech's mission aligns with community needs and fire safety protocols.</p>
+                            <div class="flex flex-wrap gap-2 justify-center sm:justify-start pt-2"><span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Operations</span><span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Product</span><span class="text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5">Community</span></div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="mt-16 flex justify-center"><div class="flex items-center gap-4 text-gray-600 text-xs uppercase tracking-widest"><span class="w-12 h-px bg-gradient-to-r from-transparent to-gray-700"></span><span>Co-founded in 2023</span><span class="w-12 h-px bg-gradient-to-l from-transparent to-gray-700"></span></div></div>
+        </div>
+    </section>
+
+    <!-- Sponsors Section -->
+    <section id="sponsors" class="py-20 md:py-32 bg-black relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/20 to-transparent"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-600/5 rounded-full blur-[150px] pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <div class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 backdrop-blur-sm"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span><span class="text-red-500 font-bold tracking-[0.2em] uppercase text-xs">Our Partners</span></div>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">Powered by <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 italic">Industry Leaders.</span></h2>
                 <p class="text-gray-400 max-w-2xl mx-auto text-lg">We're proud to be supported by organizations that share our vision of creating safer communities through innovative technology.</p>
                 <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-red-700 mx-auto mt-6 rounded-full"></div>
             </div>
-
             <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
-                
-                <!-- Telkom -->
-                <div class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(59,130,246,0.4)] hover:-translate-y-2 sponsor-card opacity-0 translate-y-8">
-                    <div class="relative h-48 overflow-hidden">
-                        <div class="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
-                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            <div class="w-20 h-20 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-500/30 transition-all duration-500">
-                                <svg class="w-10 h-10 text-blue-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 sm:p-8 text-center">
-                        <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300">Telkom</h3>
-                        <p class="text-blue-400 text-sm font-semibold uppercase tracking-wider mb-4">FutureMakers</p>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6">Our primary incubator partner providing funding, mentorship, and access to cutting-edge infrastructure for hardware development.</p>
-                        <div class="inline-flex items-center gap-2 text-blue-400 text-sm font-semibold group-hover:translate-x-2 transition-transform duration-300">
-                            <span>Learn more</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                            </svg>
-                        </div>
-                    </div>
+                <div class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(59,130,246,0.4)] hover:-translate-y-2 reveal">
+                    <div class="relative h-48 overflow-hidden"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"><div class="w-20 h-20 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-500/30 transition-all duration-500"><svg class="w-10 h-10 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div></div></div>
+                    <div class="p-6 sm:p-8 text-center"><h3 class="text-2xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300">Telkom</h3><p class="text-blue-400 text-sm font-semibold uppercase tracking-wider mb-4">FutureMakers</p><p class="text-gray-400 text-sm leading-relaxed mb-6">Our primary incubator partner providing funding, mentorship, and access to cutting-edge infrastructure for hardware development.</p></div>
                 </div>
-
-                <!-- Geekulcha -->
-                <div class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-green-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(34,197,94,0.4)] hover:-translate-y-2 sponsor-card opacity-0 translate-y-8" style="transition-delay: 100ms;">
-                    <div class="relative h-48 overflow-hidden">
-                        <div class="absolute inset-0 bg-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
-                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            <div class="w-20 h-20 rounded-2xl bg-green-500/20 border border-green-500/30 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-green-500/30 transition-all duration-500">
-                                <svg class="w-10 h-10 text-green-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 sm:p-8 text-center">
-                        <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors duration-300">Geekulcha</h3>
-                        <p class="text-green-400 text-sm font-semibold uppercase tracking-wider mb-4">Innovation Hub</p>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6">The innovation platform that connected us with the hackathon community and provided early-stage validation for our technology.</p>
-                        <div class="inline-flex items-center gap-2 text-green-400 text-sm font-semibold group-hover:translate-x-2 transition-transform duration-300">
-                            <span>Learn more</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                            </svg>
-                        </div>
-                    </div>
+                <div class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-green-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(34,197,94,0.4)] hover:-translate-y-2 reveal" style="transition-delay:100ms">
+                    <div class="relative h-48 overflow-hidden"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"><div class="w-20 h-20 rounded-2xl bg-green-500/20 border border-green-500/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-green-500/30 transition-all duration-500"><svg class="w-10 h-10 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></div></div></div>
+                    <div class="p-6 sm:p-8 text-center"><h3 class="text-2xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors duration-300">Geekulcha</h3><p class="text-green-400 text-sm font-semibold uppercase tracking-wider mb-4">Innovation Hub</p><p class="text-gray-400 text-sm leading-relaxed mb-6">The innovation platform that connected us with the hackathon community and provided early-stage validation for our technology.</p></div>
                 </div>
-
-                <!-- Enactus -->
-                <div class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-yellow-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(234,179,8,0.4)] hover:-translate-y-2 sponsor-card opacity-0 translate-y-8" style="transition-delay: 200ms;">
-                    <div class="relative h-48 overflow-hidden">
-                        <div class="absolute inset-0 bg-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
-                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            <div class="w-20 h-20 rounded-2xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-yellow-500/30 transition-all duration-500">
-                                <svg class="w-10 h-10 text-yellow-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 sm:p-8 text-center">
-                        <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors duration-300">Enactus</h3>
-                        <p class="text-yellow-400 text-sm font-semibold uppercase tracking-wider mb-4">CUT Chapter</p>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6">Our university partner providing entrepreneurial guidance and connecting us with the student developer community.</p>
-                        <div class="inline-flex items-center gap-2 text-yellow-400 text-sm font-semibold group-hover:translate-x-2 transition-transform duration-300">
-                            <span>Learn more</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                            </svg>
-                        </div>
-                    </div>
+                <div class="group relative bg-gradient-to-b from-gray-900 to-gray-900/50 rounded-3xl overflow-hidden border border-white/5 hover:border-yellow-500/50 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(234,179,8,0.4)] hover:-translate-y-2 reveal" style="transition-delay:200ms">
+                    <div class="relative h-48 overflow-hidden"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"><div class="w-20 h-20 rounded-2xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-yellow-500/30 transition-all duration-500"><svg class="w-10 h-10 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></div></div></div>
+                    <div class="p-6 sm:p-8 text-center"><h3 class="text-2xl font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors duration-300">Enactus</h3><p class="text-yellow-400 text-sm font-semibold uppercase tracking-wider mb-4">CUT Chapter</p><p class="text-gray-400 text-sm leading-relaxed mb-6">Our university partner providing entrepreneurial guidance and connecting us with the student developer community.</p></div>
                 </div>
-
-            </div>
-            
-            <!-- Bottom CTA -->
-            <div class="mt-16 text-center">
-                <p class="text-gray-500 text-sm mb-6">Interested in partnering with us?</p>
-                <button class="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-sm uppercase tracking-wide">
-                    Get in Touch
-                </button>
             </div>
         </div>
-
-        <style>
-            .sponsor-card.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            .reveal-on-scroll {
-                opacity: 0;
-                transform: translateY(20px);
-                transition: all 0.6s ease-out;
-            }
-            .reveal-on-scroll.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        </style>
-
-        <script>
-            // Intersection Observer for scroll reveal
-            const sponsorObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            document.querySelectorAll('.sponsor-card').forEach(card => {
-                sponsorObserver.observe(card);
-            });
-
-            // Header reveal
-            const sponsorHeaderObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-                sponsorHeaderObserver.observe(el);
-            });
-        </script>
     </section>
 
     <!-- CTA Section -->
-<section class="py-24 relative overflow-hidden">
-    <!-- Animated gradient background -->
-    <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-red-700"></div>
-    
-    <!-- Animated mesh gradient overlay -->
-    <div class="absolute inset-0 opacity-30">
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-overlay filter blur-[100px] animate-pulse"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-red-800 rounded-full mix-blend-overlay filter blur-[100px] animate-pulse" style="animation-delay: 1s;"></div>
-    </div>
-    
-    <!-- Noise texture overlay -->
-    <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
-    
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        <div class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-xs font-bold uppercase tracking-widest reveal-on-scroll">
-            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            Currently Accepting Partnerships
-        </div>
-        
-        <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight reveal-on-scroll">
-            Ready to Protect Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-orange-200">Community?</span>
-        </h2>
-        
-        <p class="text-lg sm:text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed reveal-on-scroll">
-            We are currently in the prototype refinement phase and open to strategic partnerships with fire safety organizations and municipalities.
-        </p>
-        
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center reveal-on-scroll">
-            <a href="mailto:contact@detech.co.za" class="group relative inline-flex items-center gap-2 bg-white text-orange-600 font-extrabold px-8 sm:px-10 py-4 rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                <span class="relative z-10">Partner With Us</span>
-                <svg class="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
-                <div class="absolute inset-0 bg-gradient-to-r from-gray-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </a>
-            
-            <a href="#research" class="inline-flex items-center gap-2 text-white font-semibold px-6 py-4 hover:text-orange-200 transition-colors duration-300">
-                View Our Progress
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </a>
-        </div>
-        
-        <!-- Trust indicators -->
-        <div class="mt-12 flex flex-wrap justify-center gap-8 text-white/60 text-sm reveal-on-scroll">
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-                </svg>
-                <span>Fire Department Approved</span>
+    <section class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-red-700"></div>
+        <div class="absolute inset-0 opacity-30"><div class="absolute top-0 left-1/4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-overlay filter blur-[100px] animate-pulse"></div><div class="absolute bottom-0 right-1/4 w-96 h-96 bg-red-800 rounded-full mix-blend-overlay filter blur-[100px] animate-pulse" style="animation-delay:1s"></div></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-xs font-bold uppercase tracking-widest reveal"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>Currently Accepting Partnerships</div>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight reveal">Ready to Protect Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-orange-200">Community?</span></h2>
+            <p class="text-lg sm:text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed reveal">We are currently in the prototype refinement phase and open to strategic partnerships with fire safety organizations and municipalities.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center reveal">
+                <a href="mailto:contact@detech.co.za" class="group relative inline-flex items-center gap-2 bg-white text-orange-600 font-extrabold px-8 sm:px-10 py-4 rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <span class="relative z-10">Partner With Us</span>
+                    <svg class="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
+                <a href="#research" class="inline-flex items-center gap-2 text-white font-semibold px-6 py-4 hover:text-orange-200 transition-colors duration-300">View Our Progress <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></a>
             </div>
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                <span>SDG Aligned</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                <span>Award Winning Tech</span>
+            <div class="mt-12 flex flex-wrap justify-center gap-8 text-white/60 text-sm reveal">
+                <div class="flex items-center gap-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg><span>Fire Department Approved</span></div>
+                <div class="flex items-center gap-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><span>SDG Aligned</span></div>
+                <div class="flex items-center gap-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>Award Winning Tech</span></div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Footer -->
-<footer class="bg-black relative overflow-hidden">
-    <!-- Top gradient line -->
-    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent"></div>
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 relative z-10">
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-            
-            <!-- Brand Column -->
-            <div class="lg:col-span-1">
-                <div class="text-2xl font-black text-white mb-4 tracking-tight">
-                    DE<span class="text-orange-500">TECH</span>
+    <!-- Footer -->
+    <footer class="bg-black relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 relative z-10">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+                <div class="lg:col-span-1">
+                    <div class="text-2xl font-black text-white mb-4 tracking-tight">DE<span class="text-orange-500">TECH</span></div>
+                    <p class="text-sm text-gray-400 leading-relaxed mb-6 max-w-xs">Revolutionizing early fire detection through heat-sensing hardware and community-driven GPS alerts. Born at CUT, South Africa.</p>
+                    <div class="flex gap-3">
+                        <a href="https://www.facebook.com/profile.php?id=61561789175601" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-600 hover:border-blue-600 transition-all duration-300"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+                        <a href="https://www.linkedin.com/company/detech-firelink" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-700 hover:border-blue-700 transition-all duration-300"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
+                        <a href="https://chat.whatsapp.com/REPLACE_WITH_YOUR_GROUP_LINK" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-green-600 hover:border-green-600 transition-all duration-300"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-400 leading-relaxed mb-6 max-w-xs">
-                    Revolutionizing early fire detection through heat-sensing hardware and community-driven GPS alerts. Born at CUT, South Africa.
-                </p>
-                <div class="flex gap-3">
-                    <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-600 hover:border-orange-600 transition-all duration-300 group">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-600 hover:border-orange-600 transition-all duration-300 group">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-600 hover:border-orange-600 transition-all duration-300 group">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                        </svg>
-                    </a>
+                <div>
+                    <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs flex items-center gap-2"><span class="w-4 h-px bg-orange-500"></span>Explore</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#about" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"><span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>About Our Mission</a></li>
+                        <li><a href="#journey" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"><span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>Our Roadmap</a></li>
+                        <li><a href="#research" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"><span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>Field Validation</a></li>
+                        <li><a href="#" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"><span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs flex items-center gap-2"><span class="w-4 h-px bg-orange-500"></span>Get In Touch</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start gap-3 group"><div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/20 transition-colors duration-300"><svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><span class="text-gray-400 leading-relaxed">Bloemfontein, South Africa<br><span class="text-gray-500">Central University of Technology</span></span></li>
+                        <li class="flex items-center gap-3 group"><div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/20 transition-colors duration-300"><svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><a href="mailto:info@detech.co.za" class="text-gray-400 hover:text-orange-400 transition-colors duration-300">info@detech.co.za</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs flex items-center gap-2"><span class="w-4 h-px bg-orange-500"></span>Stay Updated</h4>
+                    <p class="text-gray-400 text-sm mb-4">Get the latest updates on our prototype development and deployment.</p>
+                    <form class="flex gap-2" onsubmit="event.preventDefault()">
+                        <input type="email" placeholder="Enter your email" class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 transition-all duration-300">
+                        <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors duration-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>
+                    </form>
                 </div>
             </div>
-
-            <!-- Explore Column -->
-            <div>
-                <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs flex items-center gap-2">
-                    <span class="w-4 h-px bg-orange-500"></span>
-                    Explore
-                </h4>
-                <ul class="space-y-3 text-sm">
-                    <li>
-                        <a href="#about" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300">
-                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>
-                            About Our Mission
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#journey" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300">
-                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>
-                            Our Roadmap
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#research" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300">
-                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>
-                            Field Validation
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300">
-                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500/50 group-hover:bg-orange-500 transition-colors duration-300"></span>
-                            Privacy Policy
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Contact Column -->
-            <div>
-                <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs flex items-center gap-2">
-                    <span class="w-4 h-px bg-orange-500"></span>
-                    Get In Touch
-                </h4>
-                <ul class="space-y-4 text-sm">
-                    <li class="flex items-start gap-3 group">
-                        <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/20 transition-colors duration-300">
-                            <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                            </svg>
-                        </div>
-                        <span class="text-gray-400 leading-relaxed">Bloemfontein, South Africa<br><span class="text-gray-500">Central University of Technology</span></span>
-                    </li>
-                    <li class="flex items-center gap-3 group">
-                        <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/20 transition-colors duration-300">
-                            <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                            </svg>
-                        </div>
-                        <a href="mailto:info@detech.co.za" class="text-gray-400 hover:text-orange-400 transition-colors duration-300">info@detech.co.za</a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Newsletter Column -->
-            <div>
-                <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs flex items-center gap-2">
-                    <span class="w-4 h-px bg-orange-500"></span>
-                    Stay Updated
-                </h4>
-                <p class="text-gray-400 text-sm mb-4">Get the latest updates on our prototype development and deployment.</p>
-                <form class="flex gap-2" onsubmit="event.preventDefault();">
-                    <input type="email" placeholder="Enter your email" class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 focus:bg-white/10 transition-all duration-300">
-                    <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
-                    </button>
-                </form>
+            <div class="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-[10px] sm:text-xs text-gray-600 uppercase tracking-widest text-center md:text-left">&copy; 2026 DeTech. Co-founded by <span class="text-gray-400">Delight Chetter</span> & <span class="text-gray-400">Kabelo Makhetha</span>. All Rights Reserved.</p>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-[10px] sm:text-xs text-gray-600 hover:text-gray-400 uppercase tracking-widest transition-colors duration-300">Terms</a>
+                    <a href="#" class="text-[10px] sm:text-xs text-gray-600 hover:text-gray-400 uppercase tracking-widest transition-colors duration-300">Privacy</a>
+                    <a href="#" class="text-[10px] sm:text-xs text-gray-600 hover:text-gray-400 uppercase tracking-widest transition-colors duration-300">Cookies</a>
+                </div>
             </div>
         </div>
+    </footer>
 
-        <!-- Bottom Bar -->
-        <div class="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-[10px] sm:text-xs text-gray-600 uppercase tracking-widest text-center md:text-left">
-                &copy; 2026 DeTech. Co-founded by <span class="text-gray-400">Delight Chetter</span> & <span class="text-gray-400">Kabelo Makhetha</span>. All Rights Reserved.
-            </p>
-            
-            <div class="flex items-center gap-6">
-                <a href="#" class="text-[10px] sm:text-xs text-gray-600 hover:text-gray-400 uppercase tracking-widest transition-colors duration-300">Terms</a>
-                <a href="#" class="text-[10px] sm:text-xs text-gray-600 hover:text-gray-400 uppercase tracking-widest transition-colors duration-300">Privacy</a>
-                <a href="#" class="text-[10px] sm:text-xs text-gray-600 hover:text-gray-400 uppercase tracking-widest transition-colors duration-300">Cookies</a>
-            </div>
-        </div>
-    </div>
-</footer>
+</div><!-- /#main-site -->
 
-<style>
-    .reveal-on-scroll {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.6s ease-out;
-    }
-    .reveal-on-scroll.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-</style>
 
+<!-- ══════════════════════════════════════ -->
+<!--  GATE + FORM LOGIC                    -->
+<!-- ══════════════════════════════════════ -->
 <script>
-    // Simple reveal animation
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
+(function () {
+    const STORAGE_KEY = 'detech_registered';
 
-    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-        observer.observe(el);
+    // ── Helpers ──────────────────────────────────────────────
+    function showStep(id) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function showMain() {
+        document.getElementById('gate-overlay').classList.add('hidden');
+        document.getElementById('main-site').classList.remove('hidden');
+        document.body.style.overflow = '';
+        // Kick off scroll reveal for main site
+        initScrollReveal();
+    }
+
+    function setError(id, msg) {
+        const input = document.getElementById(id);
+        const err   = document.getElementById('err-' + id.replace('f-',''));
+        if (input)  input.classList.add('error');
+        if (err)  { err.textContent = msg; err.classList.remove('hidden'); }
+    }
+    function clearErrors() {
+        document.querySelectorAll('.form-input').forEach(i => i.classList.remove('error'));
+        document.querySelectorAll('.field-error').forEach(e => e.classList.add('hidden'));
+        document.getElementById('form-error').classList.add('hidden');
+    }
+
+    // ── Check if already registered ──────────────────────────
+    if (localStorage.getItem(STORAGE_KEY) === 'true') {
+        showMain();
+        return; // skip everything else
+    }
+
+    // Prevent scrolling while gate is open
+    document.body.style.overflow = 'hidden';
+
+    // ── Step 1 → Step 2 ──────────────────────────────────────
+    document.getElementById('btn-start-register').addEventListener('click', () => {
+        showStep('step-form');
     });
+
+    // ── Form submission ───────────────────────────────────────
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const name    = document.getElementById('f-name').value.trim();
+        const surname = document.getElementById('f-surname').value.trim();
+        const age     = document.getElementById('f-age').value.trim();
+        const phone   = document.getElementById('f-phone').value.trim();
+        const email   = document.getElementById('f-email').value.trim();
+        const address = document.getElementById('f-address').value.trim();
+
+        let valid = true;
+        if (!name)    { setError('f-name',    'First name is required');  valid = false; }
+        if (!surname) { setError('f-surname', 'Surname is required');     valid = false; }
+        if (!age || isNaN(age) || age < 1 || age > 120) { setError('f-age', 'Enter a valid age (1–120)'); valid = false; }
+        if (!phone)   { setError('f-phone',   'Phone number is required'); valid = false; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('f-email', 'Enter a valid email address'); valid = false; }
+        if (!address) { setError('f-address', 'Address is required');     valid = false; }
+        if (!valid) return;
+
+        // Loading state
+        const btn    = document.getElementById('btn-submit');
+        const txt    = document.getElementById('btn-submit-text');
+        const spin   = document.getElementById('btn-submit-spinner');
+        btn.disabled = true;
+        txt.textContent = 'Saving...';
+        spin.classList.remove('hidden');
+
+        // Wait for Firebase if not ready yet
+        if (!window.__firebaseReady) {
+            await new Promise(res => document.addEventListener('firebaseReady', res, { once: true }));
+        }
+
+        const { collection, addDoc, query, where, getDocs } = window.__firestore;
+        const db = window.__db;
+
+        try {
+            // Duplicate email check
+            const q  = query(collection(db, 'registrations'), where('email', '==', email));
+            const qs = await getDocs(q);
+            if (!qs.empty) {
+                // Already registered → treat as valid, go straight to main
+                localStorage.setItem(STORAGE_KEY, 'true');
+                showMain();
+                return;
+            }
+
+            await addDoc(collection(db, 'registrations'), {
+                name, surname,
+                age: parseInt(age, 10),
+                phone, email, address,
+                registeredAt: new Date().toISOString(),
+                source: 'website'
+            });
+
+            localStorage.setItem(STORAGE_KEY, 'true');
+
+            // Show thank you with personalised name
+            document.getElementById('thanks-name').textContent =
+                `Thank you, ${name}! You've officially joined the DeTech movement.`;
+            showStep('step-thanks');
+
+        } catch (err) {
+            console.error(err);
+            const errBanner = document.getElementById('form-error');
+            errBanner.textContent = 'Something went wrong. Please check your connection and try again.';
+            errBanner.classList.remove('hidden');
+            btn.disabled = false;
+            txt.textContent = 'Complete Registration';
+            spin.classList.add('hidden');
+        }
+    });
+
+    // ── Step 3 → Enter site ───────────────────────────────────
+    document.getElementById('btn-enter-site').addEventListener('click', showMain);
+
+    // ── Scroll reveal (init after gate closes) ────────────────
+    function initScrollReveal() {
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    if (entry.target.dataset.index !== undefined) {
+                        const tl = document.querySelector('[data-timeline]');
+                        if (tl) tl.style.height = ((parseInt(entry.target.dataset.index) + 1) / 3 * 100) + '%';
+                    }
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.reveal, .timeline-item').forEach(el => obs.observe(el));
+    }
+
+})();
 </script>
 
 </body>
-</html>
 </html>
