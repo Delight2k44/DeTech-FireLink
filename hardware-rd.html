@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeTech | Hardware R&D Deep Dive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Space Grotesk', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        detech: {
+                            red: '#ef4444',
+                            dark: '#030308',
+                            surface: '#0c0c14',
+                            border: '#1a1a2e',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 1.2s ease-out forwards',
+                        'scale-in': 'scaleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'shimmer': 'shimmer 3s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-6px)' },
+                        },
+                        glowPulse: {
+                            '0%, 100%': { opacity: '0.3' },
+                            '50%': { opacity: '0.7' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(50px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                        shimmer: {
+                            '0%': { left: '-100%' },
+                            '100%': { left: '200%' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #030308;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030308;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a3a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ef4444;
+        }
+
+        /* Noise texture overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        /* Scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* Image parallax zoom */
+        .img-zoom {
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .group:hover .img-zoom {
+            transform: scale(1.08);
+        }
+
+        /* Glass tag */
+        .glass-tag {
+            background: rgba(239, 68, 68, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Shimmer effect */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        /* Hero text gradient */
+        .hero-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 50%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Animated border on hover */
+        .hover-border-glow {
+            position: relative;
+        }
+        .hover-border-glow::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(239,68,68,0.4), transparent 60%, rgba(239,68,68,0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .hover-border-glow:hover::before {
+            opacity: 1;
+        }
+
+        /* Quote accent line */
+        .quote-line {
+            position: relative;
+        }
+        .quote-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #ef4444, rgba(239,68,68,0.3));
+            border-radius: 2px;
+        }
+
+        /* Section number watermark */
+        .section-watermark {
+            position: absolute;
+            font-size: 8rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.015);
+            font-family: 'Space Grotesk', sans-serif;
+            pointer-events: none;
+            user-select: none;
+            line-height: 1;
+        }
+
+        /* Progress bar */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ef4444, #f87171);
+            z-index: 100;
+            transition: width 0.1s linear;
+        }
+
+        /* Card tilt */
+        .tilt-card {
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .tilt-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Nav link underline */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #ef4444;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Spec card */
+        .spec-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .spec-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(239,68,68,0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .spec-card:hover::before {
+            opacity: 1;
+        }
+        .spec-card:hover {
+            border-color: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.03);
+            transform: translateY(-4px);
+        }
+
+        /* Timeline connector */
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 60px;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, rgba(239,68,68,0.3), transparent);
+        }
+    </style>
+<base target="_blank">
+</head>
+<body class="bg-detech-dark text-white antialiased overflow-x-hidden">
+
+    <!-- Reading progress bar -->
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <!-- Noise overlay -->
+    <div class="noise-overlay"></div>
+
+    <!-- Ambient background glows -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute top-[5%] left-[-5%] w-[500px] h-[500px] bg-red-600/4 rounded-full blur-[150px] animate-glow-pulse"></div>
+        <div class="absolute bottom-[15%] right-[-10%] w-[400px] h-[400px] bg-red-900/3 rounded-full blur-[120px] animate-glow-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex items-center justify-between px-6 md:px-12 py-5 backdrop-blur-2xl bg-black/20 border-b border-white/[0.06] sticky top-0 z-50 transition-all duration-300" id="navbar">
+        <a href="index.html" class="group flex items-center gap-1 text-xl font-display font-bold tracking-tight hover:opacity-80 transition-opacity">
+            DE<span class="text-red-500 group-hover:text-red-400 transition-colors">TECH</span>
+        </a>
+        <div class="flex items-center gap-6">
+            <a href="index.html" class="nav-link text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative w-full h-[60vh] md:h-[75vh] bg-gray-900 overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="images/DETECH picture 1.jpg" alt="Hardware R&D Cover" class="w-full h-full object-cover opacity-50 scale-105 animate-scale-in">
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-detech-dark via-detech-dark/60 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-detech-dark/40 to-transparent"></div>
+
+        <div class="absolute inset-0 flex flex-col justify-end max-w-5xl mx-auto px-6 md:px-12 pb-16 md:pb-20">
+            <div class="reveal">
+                <div class="inline-flex items-center gap-2 glass-tag text-red-400 text-[10px] font-bold px-4 py-2 rounded-full uppercase tracking-[0.2em] mb-6">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                    Technical Newsletter &mdash; Issue #01
+                </div>
+            </div>
+            <h1 class="reveal reveal-delay-1 font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9] mb-6 hero-gradient">
+                Inside the Hardware:<br>Building Fire-Link Lite
+            </h1>
+            <p class="reveal reveal-delay-2 text-gray-400 max-w-xl text-base md:text-lg leading-relaxed">
+                An engineering breakdown of our low-cost, offline-capable heat sensing systems designed to secure informal communities.
+            </p>
+
+            <!-- Scroll indicator -->
+            <div class="reveal reveal-delay-3 mt-10 flex items-center gap-3 text-gray-600">
+                <div class="w-[1px] h-8 bg-gradient-to-b from-red-500/50 to-transparent"></div>
+                <span class="text-[10px] uppercase tracking-[0.2em]">Scroll to explore</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-5xl mx-auto px-6 md:px-12 py-20 md:py-32 space-y-32 md:space-y-40">
+
+        <!-- Intro Quote -->
+        <section class="reveal relative">
+            <div class="section-watermark top-[-3rem] left-[-2rem]">01</div>
+            <div class="quote-line pl-8">
+                <p class="text-xl md:text-2xl text-gray-200 font-medium leading-relaxed font-display">
+                    Innovation doesn't require over-complicated architectures; it requires absolute reliability where it matters most. Our R&D team focused entirely on creating a low-overhead custom circuit framework optimized to trigger immediate responses under severe real-world thermal threats.
+                </p>
+                <div class="mt-6 flex items-center gap-3">
+                    <div class="w-8 h-[1px] bg-red-500/50"></div>
+                    <span class="text-xs text-gray-600 uppercase tracking-widest">DeTech Engineering Philosophy</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 01: Custom PCB Engineering -->
+        <section class="reveal">
+            <div class="grid md:grid-cols-12 gap-10 md:gap-12 items-center">
+                <div class="md:col-span-6 order-last md:order-first">
+                    <div class="relative rounded-3xl overflow-hidden border border-white/[0.06] shadow-2xl bg-gray-900 group hover-border-glow tilt-card">
+                        <div class="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10 mix-blend-overlay pointer-events-none"></div>
+                        <img src="images/DETECH.JPG" alt="PCB Mockup" class="w-full h-[28rem] object-cover img-zoom">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 z-20">
+                            <span class="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono">Fig. 01 &mdash; Custom PCB Layout</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-6 space-y-6 md:pl-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-mono text-red-500 tracking-wider font-bold">01</span>
+                        <div class="h-[1px] w-8 bg-red-500/30"></div>
+                        <span class="text-[10px] text-gray-600 uppercase tracking-[0.2em] font-bold">Circuit Architecture</span>
+                    </div>
+                    <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+                        Custom PCB<br>Engineering
+                    </h2>
+                    <p class="text-gray-400 leading-relaxed text-sm md:text-base">
+                        By scaling back unnecessary component draw, our custom board arrangements achieve prolonged standby cycles on highly limited battery backups. We prioritized offline computing clusters to manage immediate threshold diagnostics right on the device shell, mitigating any risks tied to localized data drops.
+                    </p>
+                    <div class="flex items-center gap-4 pt-2">
+                        <div class="flex items-center gap-2 text-gray-500 text-xs">
+                            <svg class="w-4 h-4 text-red-500/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                            </svg>
+                            <span>ARM Cortex-M4 Core</span>
+                        </div>
+                        <div class="w-1 h-1 rounded-full bg-gray-700"></div>
+                        <div class="flex items-center gap-2 text-gray-500 text-xs">
+                            <svg class="w-4 h-4 text-red-500/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span><50mW Standby</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 02: Off-Grid Solar Integration -->
+        <section class="reveal">
+            <div class="grid md:grid-cols-12 gap-10 md:gap-12 items-center">
+                <div class="md:col-span-6 space-y-6 md:pr-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-mono text-red-500 tracking-wider font-bold">02</span>
+                        <div class="h-[1px] w-8 bg-red-500/30"></div>
+                        <span class="text-[10px] text-gray-600 uppercase tracking-[0.2em] font-bold">Power Systems</span>
+                    </div>
+                    <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+                        Off-Grid Solar<br>Integration
+                    </h2>
+                    <p class="text-gray-400 leading-relaxed text-sm md:text-base">
+                        To make continuous safety practical, the sensor framework integrates miniature weather-resilient solar cell captures. This ensures the unit self-sustains its alert capacities indefinitely without shifting maintenance costs or battery replacement burdens onto vulnerable households.
+                    </p>
+                    <div class="pt-4 space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mt-0.5 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            </div>
+                            <p class="text-gray-500 text-sm">Monocrystalline solar cells with 22% efficiency rating</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mt-0.5 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            </div>
+                            <p class="text-gray-500 text-sm">LiFePO4 battery with 2000+ cycle lifespan</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mt-0.5 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            </div>
+                            <p class="text-gray-500 text-sm">IP67-rated weatherproof enclosure</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-6 md:mt-16">
+                    <div class="relative rounded-3xl overflow-hidden border border-white/[0.06] shadow-2xl bg-gray-900 group hover-border-glow tilt-card">
+                        <div class="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10 mix-blend-overlay pointer-events-none"></div>
+                        <img src="images/DETECH picture 1.jpg" alt="Solar Testing" class="w-full h-[28rem] object-cover img-zoom">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 z-20">
+                            <span class="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono">Fig. 02 &mdash; Solar Field Testing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Specs Grid -->
+        <section class="reveal">
+            <div class="text-center mb-12">
+                <span class="text-[10px] text-gray-600 uppercase tracking-[0.3em] font-bold">Device Specifications</span>
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-white mt-3">Fire-Link Lite</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="spec-card rounded-2xl border border-white/[0.06] bg-white/[0.02] p-8">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-5">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-sm font-semibold text-gray-300 mb-1">Processing</h3>
+                    <p class="text-2xl font-display font-bold text-white mb-1">ARM M4</p>
+                    <p class="text-xs text-gray-500">64MHz, 256KB Flash, 64KB SRAM</p>
+                </div>
+                <div class="spec-card rounded-2xl border border-white/[0.06] bg-white/[0.02] p-8">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-5">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-sm font-semibold text-gray-300 mb-1">Power</h3>
+                    <p class="text-2xl font-display font-bold text-white mb-1"><50mW</p>
+                    <p class="text-xs text-gray-500">Standby draw, solar + LiFePO4 backup</p>
+                </div>
+                <div class="spec-card rounded-2xl border border-white/[0.06] bg-white/[0.02] p-8">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-5">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-sm font-semibold text-gray-300 mb-1">Durability</h3>
+                    <p class="text-2xl font-display font-bold text-white mb-1">IP67</p>
+                    <p class="text-xs text-gray-500">Weatherproof, -20°C to 60°C range</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Development Timeline -->
+        <section class="reveal">
+            <div class="text-center mb-12">
+                <span class="text-[10px] text-gray-600 uppercase tracking-[0.3em] font-bold">Development Roadmap</span>
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-white mt-3">Build Phases</h2>
+            </div>
+            <div class="relative max-w-2xl mx-auto">
+                <div class="timeline-line hidden md:block"></div>
+                <div class="space-y-8">
+                    <div class="flex gap-6 items-start">
+                        <div class="hidden md:flex w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 items-center justify-center flex-shrink-0 z-10">
+                            <span class="text-xs font-bold text-red-500">01</span>
+                        </div>
+                        <div class="flex-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="md:hidden text-xs font-bold text-red-500">01</span>
+                                <span class="text-[10px] text-gray-600 uppercase tracking-widest">Q1 2025</span>
+                            </div>
+                            <h3 class="text-sm font-semibold text-gray-300 mb-1">Prototype Validation</h3>
+                            <p class="text-xs text-gray-500 leading-relaxed">Initial PCB design, thermal sensor calibration, and firmware baseline testing in controlled environments.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6 items-start">
+                        <div class="hidden md:flex w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 items-center justify-center flex-shrink-0 z-10">
+                            <span class="text-xs font-bold text-red-500">02</span>
+                        </div>
+                        <div class="flex-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="md:hidden text-xs font-bold text-red-500">02</span>
+                                <span class="text-[10px] text-gray-600 uppercase tracking-widest">Q2 2025</span>
+                            </div>
+                            <h3 class="text-sm font-semibold text-gray-300 mb-1">Solar Integration</h3>
+                            <p class="text-xs text-gray-500 leading-relaxed">Power management optimization, solar cell integration, and extended field endurance testing across variable weather conditions.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6 items-start">
+                        <div class="hidden md:flex w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 items-center justify-center flex-shrink-0 z-10">
+                            <span class="text-xs font-bold text-red-500">03</span>
+                        </div>
+                        <div class="flex-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="md:hidden text-xs font-bold text-red-500">03</span>
+                                <span class="text-[10px] text-gray-600 uppercase tracking-widest">Q3 2025</span>
+                            </div>
+                            <h3 class="text-sm font-semibold text-gray-300 mb-1">Community Deployment</h3>
+                            <p class="text-xs text-gray-500 leading-relaxed">Pilot installation in 3 target townships, real-world feedback collection, and iterative hardware refinements.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats / Impact Bar -->
+        <section class="reveal">
+            <div class="relative rounded-3xl border border-white/[0.06] bg-gradient-to-br from-gray-900/50 to-gray-950/80 p-8 md:p-12 overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+                <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div class="space-y-2">
+                        <div class="font-display text-4xl md:text-5xl font-bold text-white">47</div>
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Units Built</div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="font-display text-4xl md:text-5xl font-bold text-white"><$15</div>
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">BOM Cost</div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="font-display text-4xl md:text-5xl font-bold text-white">6mo</div>
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Dev Cycle</div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="font-display text-4xl md:text-5xl font-bold text-red-500">0</div>
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Field Failures</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Next Phase CTA -->
+        <section class="reveal text-center">
+            <div class="inline-flex flex-col items-center gap-6">
+                <span class="text-[10px] text-gray-600 uppercase tracking-[0.3em]">Continue Reading</span>
+                <a href="community-impact.html" class="group flex items-center gap-4 px-8 py-4 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-red-500/30 transition-all duration-500">
+                    <div class="text-left">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Next Phase</div>
+                        <div class="text-white font-display font-semibold group-hover:text-red-400 transition-colors">Community Impact Visits</div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-500 group-hover:text-red-400 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/[0.04] py-12 relative z-10">
+        <div class="max-w-5xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-display font-bold text-white">DE<span class="text-red-500">TECH</span></span>
+                <span class="text-gray-700 mx-2">|</span>
+                <span class="text-xs text-gray-600 uppercase tracking-widest">Hardware R&D Hub</span>
+            </div>
+            <div class="text-[11px] text-gray-700 uppercase tracking-widest">
+                &copy; 2026 DeTech. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Reading progress bar
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            document.getElementById('readingProgress').style.width = progress + '%';
+        });
+
+        // Scroll reveal animation
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -60px 0px'
+        });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // Navbar background on scroll
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-black/50', 'border-white/[0.08]');
+                navbar.classList.remove('bg-black/20', 'border-white/[0.06]');
+            } else {
+                navbar.classList.remove('bg-black/50', 'border-white/[0.08]');
+                navbar.classList.add('bg-black/20', 'border-white/[0.06]');
+            }
+        });
+
+        // Smooth parallax for hero image
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroImg = document.querySelector('header img');
+            if (heroImg && scrolled < window.innerHeight) {
+                heroImg.style.transform = `translateY(${scrolled * 0.3}px) scale(1.05)`;
+            }
+        });
+    </script>
+</body>
+</html>
+
