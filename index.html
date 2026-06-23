@@ -266,126 +266,229 @@
         </div>
 
         <!-- ── STEP 2: Registration Form ── -->
-        <div id="step-form" class="step">
-            <div class="h-1 w-full bg-gradient-to-r from-red-700 via-red-500 to-orange-500"></div>
-
-            <div class="p-8 sm:p-10">
-                <!-- Header -->
-                <div class="mb-1 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Join the Movement</p>
-                        <h2 class="text-2xl font-black text-white">Register Your Support</h2>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs text-gray-500 uppercase tracking-wider">Step</p>
-                        <p class="text-2xl font-black text-white">2<span class="text-gray-600">/2</span></p>
-                    </div>
-                </div>
-
-                <!-- Progress -->
-                <div class="progress-bar-bg my-4">
-                    <div class="progress-bar" style="width:100%"></div>
-                </div>
-
-                <!-- Error banner -->
-                <div id="form-error" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm"></div>
-
-                <!-- Form -->
-                <form id="register-form" novalidate>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="form-label">First Name</label>
-                            <input id="f-name" type="text" placeholder="Delight" class="form-input" required>
-                            <p class="field-error hidden" id="err-name">Required</p>
-                        </div>
-                        <div>
-                            <label class="form-label">Surname</label>
-                            <input id="f-surname" type="text" placeholder="Chetter" class="form-input" required>
-                            <p class="field-error hidden" id="err-surname">Required</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="form-label">Age</label>
-                            <input id="f-age" type="number" placeholder="25" min="1" max="120" class="form-input" required>
-                            <p class="field-error hidden" id="err-age">Enter a valid age</p>
-                        </div>
-                        <div>
-                            <label class="form-label">Phone Number</label>
-                            <input id="f-phone" type="tel" placeholder="+27 81 234 5678" class="form-input" required>
-                            <p class="field-error hidden" id="err-phone">Required</p>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label">Email Address</label>
-                        <input id="f-email" type="email" placeholder="you@example.com" class="form-input" required>
-                        <p class="field-error hidden" id="err-email">Enter a valid email</p>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="form-label">Street Address</label>
-                        <input id="f-address" type="text" placeholder="12 Mandela Drive, Bloemfontein" class="form-input" required>
-                        <p class="field-error hidden" id="err-address">Required</p>
-                    </div>
-
-                    <button type="submit" id="btn-submit" class="btn-primary flex items-center justify-center gap-2">
-                        <span id="btn-submit-text">Complete Registration</span>
-                        <div id="btn-submit-spinner" class="spinner hidden"></div>
-                    </button>
-                </form>
-
-                <p class="text-center text-xs text-gray-600 mt-4">🔒 Stored securely via Firebase · Never shared</p>
+        <div id="step-form" class="step" data-step="2" hidden>
+        <div class="h-1 w-full bg-gradient-to-r from-red-700 via-red-500 to-orange-500"></div>
+        <div class="p-8 sm:p-10">
+          <div class="mb-1 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Join the Movement</p>
+              <h2 class="text-2xl font-black text-white">Register Your Support</h2>
             </div>
-        </div>
-
-        <!-- ── STEP 3: Thank You ── -->
-        <div id="step-thanks" class="step">
-            <div class="h-1 w-full bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500"></div>
-
-            <div class="p-8 sm:p-10 text-center">
-                <!-- Check animation -->
-                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(34,197,94,0.4)]">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </div>
-
-                <h2 class="text-3xl font-black text-white mb-2">You're In! 🔥</h2>
-                <p id="thanks-name" class="text-gray-400 mb-1">Thank you for supporting DeTech.</p>
-                <p class="text-gray-500 text-sm mb-8">Together we protect communities. Stay connected with us below.</p>
-
-                <!-- Social links -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-                    <a href="https://www.facebook.com/profile.php?id=61561789175601" target="_blank" rel="noopener" class="social-btn social-fb">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
-                        Facebook Page
-                    </a>
-                    <a href="https://www.linkedin.com/company/detech-firelink" target="_blank" rel="noopener" class="social-btn social-li">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                        LinkedIn
-                    </a>
-                    <a href="https://chat.whatsapp.com/REPLACE_WITH_YOUR_GROUP_LINK" target="_blank" rel="noopener" class="social-btn social-wa">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                        WhatsApp Channel
-                    </a>
-                </div>
-
-                <!-- Enter site button -->
-                <button id="btn-enter-site" class="btn-primary flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                    </svg>
-                    Enter the DeTech Website
-                </button>
-
-                <p class="text-xs text-gray-600 mt-4">You won't see this screen again on this device</p>
+            <div class="text-right" aria-label="Progress">
+              <p class="text-xs text-gray-500 uppercase tracking-wider">Step</p>
+              <p class="text-2xl font-black text-white" aria-live="polite"><span id="current-step">2</span><span class="text-gray-600">/2</span></p>
             </div>
-        </div>
+          </div>
 
+          <div class="progress-bar-bg my-4" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="Form completion">
+            <div class="progress-bar" style="width:100%"></div>
+          </div>
+
+          <div id="form-error" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm" role="alert" aria-live="assertive"></div>
+
+          <form id="register-form" novalidate autocomplete="on">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="f-name" class="form-label">First Name <span aria-label="required">*</span></label>
+                <input
+                  id="f-name"
+                  name="given-name"
+                  type="text"
+                  placeholder="First Name"
+                  class="form-input"
+                  required
+                  autocomplete="given-name"
+                  autocapitalize="words"
+                  maxlength="50"
+                  pattern="[A-Za-z\s\-']+"
+                  aria-required="true"
+                  aria-describedby="err-name"
+                >
+                <p class="field-error hidden" id="err-name" role="alert">Please enter your first name</p>
+              </div>
+              <div>
+                <label for="f-surname" class="form-label">Surname <span aria-label="required">*</span></label>
+                <input
+                  id="f-surname"
+                  name="family-name"
+                  type="text"
+                  placeholder="Surname"
+                  class="form-input"
+                  required
+                  autocomplete="family-name"
+                  autocapitalize="words"
+                  maxlength="50"
+                  pattern="[A-Za-z\s\-']+"
+                  aria-required="true"
+                  aria-describedby="err-surname"
+                >
+                <p class="field-error hidden" id="err-surname" role="alert">Please enter your surname</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="f-age" class="form-label">Age <span aria-label="required">*</span></label>
+                <input
+                  id="f-age"
+                  name="age"
+                  type="number"
+                  placeholder="Age"
+                  min="13"
+                  max="120"
+                  class="form-input"
+                  required
+                  inputmode="numeric"
+                  aria-required="true"
+                  aria-describedby="err-age"
+                >
+                <p class="field-error hidden" id="err-age" role="alert">Enter a valid age (13-120)</p>
+              </div>
+              <div>
+                <label for="f-phone" class="form-label">Phone Number <span aria-label="required">*</span></label>
+                <input
+                  id="f-phone"
+                  name="tel"
+                  type="tel"
+                  placeholder="e.g. +27 82 123 4567"
+                  class="form-input"
+                  required
+                  autocomplete="tel"
+                  inputmode="tel"
+                  pattern="[\d\s\+\-\(\)]+"
+                  minlength="10"
+                  maxlength="20"
+                  aria-required="true"
+                  aria-describedby="err-phone phone-hint"
+                >
+                <p class="field-error hidden" id="err-phone" role="alert">Enter a valid phone number</p>
+                <p class="text-xs text-gray-500 mt-1" id="phone-hint">Include country code for international numbers</p>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="f-email" class="form-label">Email Address <span aria-label="required">*</span></label>
+              <input
+                id="f-email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                class="form-input"
+                required
+                autocomplete="email"
+                inputmode="email"
+                maxlength="254"
+                aria-required="true"
+                aria-describedby="err-email"
+              >
+              <p class="field-error hidden" id="err-email" role="alert">Enter a valid email address</p>
+            </div>
+
+            <!-- ADDRESS FIELD WITH SEARCH + GPS -->
+            <div class="mb-6">
+              <label for="f-address" class="form-label">Street Address <span aria-label="required">*</span></label>
+              <div class="relative" id="addrWrap">
+                <input
+                  id="f-address"
+                  name="street-address"
+                  type="text"
+                  placeholder="Search address or click 📍 to detect location..."
+                  class="form-input"
+                  style="padding-right:5.5rem;"
+                  autocomplete="off"
+                  aria-label="Street address search"
+                  aria-autocomplete="list"
+                  aria-controls="addr-dropdown"
+                  aria-expanded="false"
+                  aria-activedescendant=""
+                  required
+                  maxlength="200"
+                  aria-required="true"
+                  aria-describedby="err-address addr-hint"
+                />
+
+                <div class="addr-actions" aria-hidden="true">
+                  <div id="addr-search-icon" class="addr-icon">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+                  <div id="addr-spinner" class="spinner hidden" aria-hidden="true"></div>
+                  <div class="addr-divider"></div>
+                  <button
+                    type="button"
+                    id="btn-gps"
+                    title="Detect my location"
+                    class="gps-btn"
+                    aria-label="Use my current location"
+                  >
+                    <svg id="gps-icon" width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <div id="gps-spinner" class="spinner hidden" aria-hidden="true"></div>
+                  </button>
+                </div>
+
+                <div id="addr-dropdown" class="hidden" role="listbox" aria-label="Address suggestions"></div>
+              </div>
+
+              <p id="addr-hint" class="addr-hint">Type to search · click 📍 for GPS · or type your address manually</p>
+              <p class="field-error hidden" id="err-address" role="alert">Address is required</p>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn-primary flex items-center justify-center gap-2" aria-busy="false">
+              <span id="btn-submit-text">Complete Registration</span>
+              <div id="btn-submit-spinner" class="spinner hidden" aria-hidden="true"></div>
+            </button>
+          </form>
+
+          <p class="text-center text-xs text-gray-600 mt-4" role="note">
+            <span aria-hidden="true">🔒</span> Stored securely via Firebase · Never shared
+          </p>
+        </div>
+      </div>
+
+      <!-- STEP 3: Thank You -->
+      <div id="step-thanks" class="step" data-step="3" hidden>
+        <div class="h-1 w-full bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500"></div>
+        <div class="p-8 sm:p-10 text-center">
+          <div class="success-icon" aria-hidden="true">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h2 class="text-3xl font-black text-white mb-2">You're In! <span aria-hidden="true">🔥</span></h2>
+          <p id="thanks-name" class="text-gray-400 mb-1">Thank you for supporting DeTech.</p>
+          <p class="text-gray-500 text-sm mb-8">Together we protect communities. Stay connected with us below.</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8" role="list" aria-label="Social media links">
+            <a href="https://www.facebook.com/profile.php?id=61561789175601" target="_blank" rel="noopener noreferrer" class="social-btn social-fb" role="listitem">
+              <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+              Facebook Page
+            </a>
+            <a href="https://www.linkedin.com/company/detech-firelink" target="_blank" rel="noopener noreferrer" class="social-btn social-li" role="listitem">
+              <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              LinkedIn
+            </a>
+            <a href="" target="_blank" rel="noopener noreferrer" class="social-btn social-wa" role="listitem" aria-disabled="true">
+              <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              WhatsApp Channel
+            </a>
+          </div>
+
+          <button id="btn-enter-site" class="btn-primary flex items-center justify-center gap-2" type="button">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+            Enter the DeTech Website
+          </button>
+          <p class="text-xs text-gray-600 mt-4">You won't see this screen again on this device</p>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+
 <!-- ═════════════ END GATE OVERLAY ═════════════ -->
 
 
@@ -405,7 +508,7 @@
                 <a href="#journey" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">Our Journey<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span></a>
                 <a href="#research" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">Research<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span></a>
                 <a href="#founders" class="text-gray-300 hover:text-red-500 transition-all duration-300 relative group">Founders<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span></a>
-                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-8 rounded-lg transition transform hover:scale-105 duration-300 text-xs uppercase tracking-wider">Get Protected</button>
+                <a href="ComingSoon.html" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-8 rounded-lg transition transform hover:scale-105 duration-300 text-xs uppercase tracking-wider">Get FireLink App</a>
             </div>
         </nav>
 
@@ -423,10 +526,6 @@
             <p class="fade-in-up text-base md:text-lg text-gray-400 max-w-2xl leading-relaxed mb-10" style="animation-delay:0.2s">
                 Empowering vulnerable communities with dual-alert heat sensors and GPS technology. Locally built in South Africa, designed for the world.
             </p>
-            <div class="fade-in-up flex flex-wrap gap-4 mb-16" style="animation-delay:0.3s">
-                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-10 rounded-lg transition transform hover:scale-105 shadow-lg shadow-red-900/30 duration-300 text-sm uppercase tracking-wide">Get Protected</button>
-                <button class="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-3 px-10 rounded-lg transition duration-300 text-sm uppercase tracking-wide">Watch Demo</button>
-            </div>
             <div class="fade-in-up grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 border-t border-white/10 pt-10 w-full" style="animation-delay:0.4s">
                 <div><p class="text-3xl md:text-4xl font-bold text-red-500">1st Place</p><p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Telkom Hackathon</p></div>
                 <div><p class="text-3xl md:text-4xl font-bold text-red-500">24/7</p><p class="text-xs md:text-sm text-gray-400 uppercase tracking-widest mt-2">Offline Monitoring</p></div>
@@ -984,146 +1083,787 @@
 <!-- ══════════════════════════════════════ -->
 <!--  GATE + FORM LOGIC                    -->
 <!-- ══════════════════════════════════════ -->
-<script>
-(function () {
-    const STORAGE_KEY = 'detech_registered';
 
-    // ── Helpers ──────────────────────────────────────────────
-    function showStep(id) {
-        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
+  <!-- ═════════════ GATE + FORM LOGIC ═════════════ -->
+  <script>
+    (function (global, document) {
+      'use strict';
 
-    function showMain() {
-        document.getElementById('gate-overlay').classList.add('hidden');
-        document.getElementById('main-site').classList.remove('hidden');
-        document.body.style.overflow = '';
-        // Kick off scroll reveal for main site
-        initScrollReveal();
-    }
+      (function (global, document) {
+        'use strict';
 
-    function setError(id, msg) {
-        const input = document.getElementById(id);
-        const err   = document.getElementById('err-' + id.replace('f-',''));
-        if (input)  input.classList.add('error');
-        if (err)  { err.textContent = msg; err.classList.remove('hidden'); }
-    }
-    function clearErrors() {
-        document.querySelectorAll('.form-input').forEach(i => i.classList.remove('error'));
-        document.querySelectorAll('.field-error').forEach(e => e.classList.add('hidden'));
-        document.getElementById('form-error').classList.add('hidden');
-    }
+        const CONFIG = Object.freeze({
+          STORAGE_KEY: 'detech_registered_v2',
+          FIREBASE_TIMEOUT: 10000,
+          GEO_TIMEOUT: 12000,
+          GEO_MAX_AGE: 60000,
+          SEARCH_DEBOUNCE: 300,
+          SEARCH_MIN_CHARS: 3,
+          SEARCH_MAX_RESULTS: 6,
+          TYPEWRITER_DELAY: 12,
+          TYPEWRITER_MAX_CHARS: 80,
+          RETRY_ATTEMPTS: 3,
+          RETRY_DELAY: 1000,
+          NOMINATIM_ENDPOINT: 'https://nominatim.openstreetmap.org',
+          USER_AGENT: 'DeTechFireLinkWebsite/2.0 (contact@detech.org)',
+          COUNTRY_FILTER: 'za'
+        });
 
-    // ── Check if already registered ──────────────────────────
-    if (localStorage.getItem(STORAGE_KEY) === 'true') {
-        showMain();
-        return; // skip everything else
-    }
+        const Store = (() => {
+          let state = {
+            gpsCoords: null,
+            addrMethod: 'manual',
+            isSubmitting: false,
+            firebaseReady: false
+          };
+          const listeners = new Set();
+          return {
+            get: (key) => state[key],
+            set: (key, value) => {
+              state = { ...state, [key]: value };
+              listeners.forEach(cb => cb(key, value));
+            },
+            getAll: () => ({ ...state })
+          };
+        })();
 
-    // Prevent scrolling while gate is open
-    document.body.style.overflow = 'hidden';
+        const Utils = {
+          escapeHtml: (() => {
+            const div = document.createElement('div');
+            const text = document.createTextNode('');
+            div.appendChild(text);
+            return (str) => {
+              text.nodeValue = String(str);
+              return div.innerHTML;
+            };
+          })(),
 
-    // ── Step 1 → Step 2 ──────────────────────────────────────
-    document.getElementById('btn-start-register').addEventListener('click', () => {
-        showStep('step-form');
-    });
+          debounce: (fn, delay) => {
+            let timer = null;
+            const debounced = (...args) => {
+              clearTimeout(timer);
+              timer = setTimeout(() => fn(...args), delay);
+            };
+            debounced.cancel = () => clearTimeout(timer);
+            return debounced;
+          },
 
-    // ── Form submission ───────────────────────────────────────
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        clearErrors();
+          async retry(fn, attempts = CONFIG.RETRY_ATTEMPTS, delay = CONFIG.RETRY_DELAY) {
+            let lastError;
+            for (let i = 0; i < attempts; i++) {
+              try { return await fn(); }
+              catch (err) {
+                lastError = err;
+                if (i < attempts - 1) await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+              }
+            }
+            throw lastError;
+          },
 
-        const name    = document.getElementById('f-name').value.trim();
-        const surname = document.getElementById('f-surname').value.trim();
-        const age     = document.getElementById('f-age').value.trim();
-        const phone   = document.getElementById('f-phone').value.trim();
-        const email   = document.getElementById('f-email').value.trim();
-        const address = document.getElementById('f-address').value.trim();
+          normalizePhone: (phone) => {
+            const cleaned = phone.replace(/[^\d+]/g, '');
+            if (cleaned.startsWith('0') && cleaned.length === 10) return '+27' + cleaned.slice(1);
+            return cleaned;
+          },
 
-        let valid = true;
-        if (!name)    { setError('f-name',    'First name is required');  valid = false; }
-        if (!surname) { setError('f-surname', 'Surname is required');     valid = false; }
-        if (!age || isNaN(age) || age < 1 || age > 120) { setError('f-age', 'Enter a valid age (1–120)'); valid = false; }
-        if (!phone)   { setError('f-phone',   'Phone number is required'); valid = false; }
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('f-email', 'Enter a valid email address'); valid = false; }
-        if (!address) { setError('f-address', 'Address is required');     valid = false; }
-        if (!valid) return;
+          formatAddress: (displayName) => displayName.split(',').map(s => s.trim()).slice(0, 4).join(', '),
+          splitAddress: (displayName) => {
+            const parts = displayName.split(',').map(s => s.trim());
+            return { main: parts.slice(0, 2).join(', '), sub: parts.slice(2, 5).join(', ') };
+          },
 
-        // Loading state
-        const btn    = document.getElementById('btn-submit');
-        const txt    = document.getElementById('btn-submit-text');
-        const spin   = document.getElementById('btn-submit-spinner');
-        btn.disabled = true;
-        txt.textContent = 'Saving...';
-        spin.classList.remove('hidden');
+          validators: {
+            name: (v) => /^[A-Za-z\s\-']{2,50}$/.test(v.trim()),
+            age: (v) => {
+              const n = parseInt(v, 10);
+              return !isNaN(n) && n >= 13 && n <= 120;
+            },
+            phone: (v) => /^[\d\s\+\-\(\)]{10,20}$/.test(v.trim()),
+            email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),
+            address: (v) => v.trim().length >= 5
+          },
 
-        // Wait for Firebase if not ready yet
-        if (!window.__firebaseReady) {
-            await new Promise(res => document.addEventListener('firebaseReady', res, { once: true }));
-        }
+          storage: {
+            get: (key) => {
+              try { return localStorage.getItem(key); }
+              catch { return null; }
+            },
+            set: (key, value) => {
+              try { localStorage.setItem(key, value); } catch {}
+            }
+          }
+        };
 
-        const { collection, addDoc, query, where, getDocs } = window.__firestore;
-        const db = window.__db;
+        const DOM = (() => {
+          let cache = null;
+          return {
+            init() {
+              if (cache) return cache;
+              cache = {
+                overlay: document.getElementById('gate-overlay'),
+                mainSite: document.getElementById('main-site'),
+                steps: {
+                  dyk: document.getElementById('step-dyk'),
+                  form: document.getElementById('step-form'),
+                  thanks: document.getElementById('step-thanks')
+                },
+                form: document.getElementById('register-form'),
+                inputs: {
+                  name: document.getElementById('f-name'),
+                  surname: document.getElementById('f-surname'),
+                  age: document.getElementById('f-age'),
+                  phone: document.getElementById('f-phone'),
+                  email: document.getElementById('f-email'),
+                  address: document.getElementById('f-address')
+                },
+                errors: {
+                  phone: document.getElementById('err-phone'),
+                  email: document.getElementById('err-email'),
+                  name: document.getElementById('err-name'),
+                  surname: document.getElementById('err-surname'),
+                  age: document.getElementById('err-age'),
+                  address: document.getElementById('err-address'),
+                  form: document.getElementById('form-error')
+                },
+                buttons: {
+                  start: document.getElementById('btn-start-register'),
+                  submit: document.getElementById('btn-submit'),
+                  gps: document.getElementById('btn-gps'),
+                  enter: document.getElementById('btn-enter-site')
+                },
+                spinners: {
+                  submit: document.getElementById('btn-submit-spinner'),
+                  submitText: document.getElementById('btn-submit-text')
+                },
+                address: {
+                  input: document.getElementById('f-address'),
+                  dropdown: document.getElementById('addr-dropdown'),
+                  spinner: document.getElementById('addr-spinner'),
+                  searchIcon: document.getElementById('addr-search-icon'),
+                  err: document.getElementById('err-address'),
+                  hint: document.getElementById('addr-hint'),
+                  wrap: document.getElementById('addrWrap'),
+                  btnGPS: document.getElementById('btn-gps'),
+                  gpsIcon: document.getElementById('gps-icon'),
+                  gpsSpinner: document.getElementById('gps-spinner')
+                },
+                thanksName: document.getElementById('thanks-name')
+              };
+              return cache;
+            },
+            get: () => cache || DOM.init()
+          };
+        })();
 
-        try {
-            // Duplicate email check
-            const q  = query(collection(db, 'registrations'), where('email', '==', email));
-            const qs = await getDocs(q);
-            if (!qs.empty) {
-                // Already registered → treat as valid, go straight to main
-                localStorage.setItem(STORAGE_KEY, 'true');
-                showMain();
-                return;
+        const UI = {
+          showStep(stepId) {
+            const dom = DOM.get();
+            Object.values(dom.steps).forEach(el => { el.classList.remove('active'); el.hidden = true; });
+            const target = dom.steps[stepId === 'step-dyk' ? 'dyk' : stepId === 'step-form' ? 'form' : 'thanks'];
+            if (target) {
+              target.classList.add('active');
+              target.hidden = false;
+              const focusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+              if (focusable) focusable.focus();
+            }
+          },
+
+          showMain() {
+            const dom = DOM.get();
+            if (dom.overlay) dom.overlay.classList.add('hidden');
+            if (dom.mainSite) dom.mainSite.classList.remove('hidden');
+            if (dom.mainSite) dom.mainSite.hidden = false;
+            document.body.style.overflow = '';
+          },
+
+          setFieldError(fieldId, message) {
+            const dom = DOM.get();
+            const input = dom.inputs[fieldId.replace('f-', '')];
+            const err = document.getElementById('err-' + fieldId.replace('f-', ''));
+            if (input) {
+              input.classList.add('error');
+              input.setAttribute('aria-invalid', 'true');
+            }
+            if (err) {
+              err.textContent = message;
+              err.classList.remove('hidden');
+            }
+          },
+
+          clearErrors() {
+            document.querySelectorAll('.form-input').forEach(i => {
+              i.classList.remove('error');
+              i.setAttribute('aria-invalid', 'false');
+            });
+            document.querySelectorAll('.field-error').forEach(e => e.classList.add('hidden'));
+            const formErr = DOM.get().errors.form;
+            if (formErr) formErr.classList.add('hidden');
+          },
+
+          setSubmitLoading(isLoading) {
+            const dom = DOM.get();
+            const btn = dom.buttons.submit;
+            const txt = dom.spinners.submitText;
+            const spin = dom.spinners.submit;
+            if (!btn || !txt || !spin) return;
+            btn.disabled = isLoading;
+            btn.setAttribute('aria-busy', isLoading);
+            txt.textContent = isLoading ? 'Saving...' : 'Complete Registration';
+            spin.classList.toggle('hidden', !isLoading);
+          },
+
+          announce(message, priority = 'polite') {
+            let liveRegion = document.getElementById(`aria-live-${priority}`);
+            if (!liveRegion) {
+              liveRegion = document.createElement('div');
+              liveRegion.id = `aria-live-${priority}`;
+              liveRegion.setAttribute('aria-live', priority);
+              liveRegion.setAttribute('aria-atomic', 'true');
+              liveRegion.className = 'sr-only';
+              liveRegion.style.cssText = 'position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;';
+              document.body.appendChild(liveRegion);
+            }
+            liveRegion.textContent = message;
+            setTimeout(() => { liveRegion.textContent = ''; }, 1000);
+          }
+        };
+
+        const AddressModule = (() => {
+          let abortController = null;
+          let debouncedSearch = null;
+          let activeIndex = -1;
+          let results = [];
+          let isTypewriting = false;
+
+          const dom = () => DOM.get().address;
+
+          function showSearchSpinner(on) {
+            const d = dom();
+            d.spinner.classList.toggle('hidden', !on);
+            d.searchIcon.classList.toggle('hidden', on);
+          }
+
+          function setGPSLoading(on) {
+            const d = dom();
+            d.btnGPS.disabled = on;
+            d.gpsIcon.classList.toggle('hidden', on);
+            d.gpsSpinner.classList.toggle('hidden', !on);
+            d.btnGPS.setAttribute('aria-busy', on);
+          }
+
+          function openDropdown() {
+            const d = dom();
+            d.dropdown.classList.remove('hidden');
+            d.input.setAttribute('aria-expanded', 'true');
+          }
+
+          function closeDropdown() {
+            const d = dom();
+            d.dropdown.classList.add('hidden');
+            d.dropdown.innerHTML = '';
+            d.input.setAttribute('aria-expanded', 'false');
+            d.input.setAttribute('aria-activedescendant', '');
+            activeIndex = -1;
+            results = [];
+          }
+
+          function setFieldSuccess() {
+            const d = dom();
+            d.err.classList.add('hidden');
+            d.input.classList.remove('error');
+            d.input.style.borderColor = '#22c55e';
+            d.input.setAttribute('aria-invalid', 'false');
+          }
+
+          function setFieldError(msg) {
+            const d = dom();
+            d.err.textContent = msg;
+            d.err.classList.remove('hidden');
+            d.input.classList.add('error');
+            d.input.style.borderColor = '';
+            d.input.setAttribute('aria-invalid', 'true');
+            UI.announce(msg, 'assertive');
+          }
+
+          function cancelOperations() {
+            if (abortController) {
+              abortController.abort();
+              abortController = null;
+            }
+            if (debouncedSearch) debouncedSearch.cancel();
+            isTypewriting = false;
+          }
+
+          async function fetchWithTimeout(url, options = {}) {
+            abortController = new AbortController();
+            const timeout = setTimeout(() => abortController.abort(), options.timeout || 10000);
+            try {
+              const response = await fetch(url, {
+                ...options,
+                signal: abortController.signal,
+                headers: {
+                  'User-Agent': CONFIG.USER_AGENT,
+                  'Accept': 'application/json',
+                  ...options.headers
+                }
+              });
+              clearTimeout(timeout);
+              return response;
+            } catch (err) {
+              clearTimeout(timeout);
+              throw err;
+            }
+          }
+
+          async function reverseGeocode(lat, lng) {
+            const url = new URL(`${CONFIG.NOMINATIM_ENDPOINT}/reverse`);
+            url.searchParams.set('format', 'json');
+            url.searchParams.set('lat', lat);
+            url.searchParams.set('lon', lng);
+            url.searchParams.set('addressdetails', '1');
+            url.searchParams.set('zoom', '18');
+            url.searchParams.set('accept-language', 'en');
+            const res = await Utils.retry(() => fetchWithTimeout(url));
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+          }
+
+          async function fetchSuggestions(query) {
+            const url = new URL(`${CONFIG.NOMINATIM_ENDPOINT}/search`);
+            url.searchParams.set('q', query);
+            url.searchParams.set('format', 'json');
+            url.searchParams.set('addressdetails', '1');
+            url.searchParams.set('limit', String(CONFIG.SEARCH_MAX_RESULTS));
+            url.searchParams.set('countrycodes', CONFIG.COUNTRY_FILTER);
+            url.searchParams.set('accept-language', 'en');
+            const res = await Utils.retry(() => fetchWithTimeout(url));
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+          }
+
+          function renderDropdown(items) {
+            const d = dom();
+            results = items;
+            activeIndex = -1;
+            d.dropdown.innerHTML = '';
+
+            if (!items.length) {
+              d.dropdown.innerHTML = `
+                <div class="addr-no-results" role="status">
+                  No addresses found — try a different search or type manually.
+                </div>`;
+              openDropdown();
+              return;
             }
 
-            await addDoc(collection(db, 'registrations'), {
-                name, surname,
-                age: parseInt(age, 10),
-                phone, email, address,
-                registeredAt: new Date().toISOString(),
-                source: 'website'
+            const list = document.createElement('div');
+            list.setAttribute('role', 'listbox');
+            list.setAttribute('aria-label', 'Address suggestions');
+
+            items.forEach((item, i) => {
+              const { main, sub } = Utils.splitAddress(item.display_name);
+              const el = document.createElement('div');
+              el.id = `addr-opt-${i}`;
+              el.className = 'addr-item';
+              el.setAttribute('role', 'option');
+              el.setAttribute('aria-selected', 'false');
+              el.setAttribute('tabindex', '-1');
+              el.innerHTML = `
+                <svg style="color:#ef4444;flex-shrink:0;margin-top:2px;" width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <div>
+                  <div style="font-weight:600;font-size:0.82rem;color:#f3f4f6;">${Utils.escapeHtml(main)}</div>
+                  ${sub ? `<div style="font-size:0.71rem;color:#9ca3af;margin-top:1px;">${Utils.escapeHtml(sub)}</div>` : ''}
+                </div>`;
+
+              el.addEventListener('mouseenter', () => highlightItem(i));
+              el.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                selectItem(i);
+              });
+              list.appendChild(el);
             });
 
-            localStorage.setItem(STORAGE_KEY, 'true');
+            d.dropdown.appendChild(list);
+            openDropdown();
+            UI.announce(`${items.length} address suggestions found`);
+          }
 
-            // Show thank you with personalised name
-            document.getElementById('thanks-name').textContent =
-                `Thank you, ${name}! You've officially joined the DeTech movement.`;
-            showStep('step-thanks');
+          function highlightItem(index) {
+            const d = dom();
+            const items = d.dropdown.querySelectorAll('.addr-item');
+            items.forEach((el, i) => {
+              const isActive = i === index;
+              el.classList.toggle('active', isActive);
+              el.setAttribute('aria-selected', String(isActive));
+              if (isActive) {
+                el.scrollIntoView({ block: 'nearest' });
+                d.input.setAttribute('aria-activedescendant', el.id);
+              }
+            });
+            activeIndex = index;
+          }
 
-        } catch (err) {
-            console.error(err);
-            const errBanner = document.getElementById('form-error');
-            errBanner.textContent = 'Something went wrong. Please check your connection and try again.';
-            errBanner.classList.remove('hidden');
-            btn.disabled = false;
-            txt.textContent = 'Complete Registration';
-            spin.classList.add('hidden');
-        }
-    });
+          function selectItem(index) {
+            const item = results[index];
+            if (!item) return;
 
-    // ── Step 3 → Enter site ───────────────────────────────────
-    document.getElementById('btn-enter-site').addEventListener('click', showMain);
+            const d = dom();
+            cancelOperations();
 
-    // ── Scroll reveal (init after gate closes) ────────────────
-    function initScrollReveal() {
-        const obs = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    if (entry.target.dataset.index !== undefined) {
-                        const tl = document.querySelector('[data-timeline]');
-                        if (tl) tl.style.height = ((parseInt(entry.target.dataset.index) + 1) / 3 * 100) + '%';
-                    }
+            d.input.value = Utils.formatAddress(item.display_name);
+            Store.set('gpsCoords', null);
+            Store.set('addrMethod', 'search');
+            closeDropdown();
+            setFieldSuccess();
+            d.hint.textContent = '✓ Address confirmed from search';
+            UI.announce('Address selected from search results');
+          }
+
+          async function typewriterFill(element, text) {
+            isTypewriting = true;
+            element.value = '';
+
+            if (text.length > CONFIG.TYPEWRITER_MAX_CHARS) {
+              element.value = text;
+              isTypewriting = false;
+              return;
+            }
+
+            for (let i = 0; i < text.length; i++) {
+              if (!isTypewriting) break;
+              element.value += text[i];
+              await new Promise(r => setTimeout(r, CONFIG.TYPEWRITER_DELAY));
+            }
+            isTypewriting = false;
+          }
+
+          async function detectGPS() {
+            const d = dom();
+
+            if (!navigator.geolocation) {
+              setFieldError('Geolocation is not supported. Please type your address manually.');
+              return;
+            }
+
+            cancelOperations();
+            setGPSLoading(true);
+            d.input.value = 'Detecting your location...';
+            d.input.disabled = true;
+            d.input.blur();
+            closeDropdown();
+            d.hint.textContent = 'Waiting for browser permission...';
+
+            try {
+              const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  enableHighAccuracy: true,
+                  timeout: CONFIG.GEO_TIMEOUT,
+                  maximumAge: CONFIG.GEO_MAX_AGE
+                });
+              });
+
+              const { latitude: lat, longitude: lng, accuracy } = position.coords;
+              Store.set('gpsCoords', { lat, lng, accuracy: Math.round(accuracy) });
+              Store.set('addrMethod', 'gps');
+
+              d.hint.textContent = `Location found (±${Math.round(accuracy)}m) · Resolving street address...`;
+              d.input.value = 'Resolving address...';
+
+              const data = await reverseGeocode(lat, lng);
+              const address = Utils.formatAddress(data.display_name || '');
+              if (!address) throw new Error('No address returned');
+
+              await typewriterFill(d.input, address);
+
+              if (Store.get('addrMethod') === 'gps') {
+                setFieldSuccess();
+                d.hint.textContent = `✓ GPS location detected (±${Math.round(accuracy)}m)`;
+                UI.announce(`Location detected. Address: ${address}`);
+              }
+            } catch (err) {
+              Store.set('gpsCoords', null);
+              Store.set('addrMethod', 'manual');
+              d.input.value = '';
+
+              const errorMap = {
+                1: { msg: 'Location access denied. Please allow location or type manually.', hint: 'Permission denied — type your address' },
+                2: { msg: 'Could not detect position. Please type manually.', hint: 'Position unavailable — type your address' },
+                3: { msg: 'Location timed out. Please type manually.', hint: 'Timed out — type your address' }
+              };
+
+              const mapped = errorMap[err.code];
+              if (mapped) {
+                setFieldError(mapped.msg);
+                d.hint.textContent = mapped.hint;
+              } else {
+                setFieldError('Location error. Please type manually.');
+                d.hint.textContent = 'Error — type your address';
+              }
+            } finally {
+              d.input.disabled = false;
+              setGPSLoading(false);
+            }
+          }
+
+          async function handleSearch(query) {
+            const d = dom();
+
+            if (query.length < CONFIG.SEARCH_MIN_CHARS) {
+              closeDropdown();
+              return;
+            }
+
+            showSearchSpinner(true);
+            d.hint.textContent = 'Searching...';
+
+            try {
+              const data = await fetchSuggestions(query);
+              renderDropdown(data);
+              d.hint.textContent = `${data.length} results found · Click to select or type manually`;
+            } catch (err) {
+              if (err && err.name === 'AbortError') return;
+              d.dropdown.innerHTML = `
+                <div class="addr-no-results" role="alert">
+                  Could not fetch suggestions — you can still type your address manually.
+                </div>`;
+              openDropdown();
+              d.hint.textContent = 'Search unavailable — type your address manually';
+            } finally {
+              showSearchSpinner(false);
+            }
+          }
+
+          debouncedSearch = Utils.debounce(handleSearch, CONFIG.SEARCH_DEBOUNCE);
+
+          return {
+            init() {
+              const d = dom();
+
+              d.input.addEventListener('input', () => {
+                const val = d.input.value.trim();
+                Store.set('gpsCoords', null);
+                Store.set('addrMethod', 'manual');
+                d.input.classList.remove('error');
+                const err = document.getElementById('err-address');
+                if (err) err.classList.add('hidden');
+
+                if (val.length >= CONFIG.SEARCH_MIN_CHARS) {
+                  d.hint.textContent = 'Searching...';
+                  debouncedSearch(val);
+                } else {
+                  closeDropdown();
+                  d.hint.textContent = 'Type to search · click 📍 for GPS · or type manually';
                 }
-            });
-        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+              });
 
-        document.querySelectorAll('.reveal, .timeline-item').forEach(el => obs.observe(el));
-    }
+              d.input.addEventListener('keydown', (e) => {
+                const items = d.dropdown.querySelectorAll('.addr-item');
+                if (d.dropdown.classList.contains('hidden') || !items.length) return;
 
-})();
-</script>
+                switch (e.key) {
+                  case 'ArrowDown':
+                    e.preventDefault();
+                    highlightItem(Math.min(activeIndex + 1, items.length - 1));
+                    break;
+                  case 'ArrowUp':
+                    e.preventDefault();
+                    highlightItem(Math.max(activeIndex - 1, 0));
+                    break;
+                  case 'Enter':
+                    e.preventDefault();
+                    if (activeIndex >= 0) selectItem(activeIndex);
+                    break;
+                  case 'Escape':
+                    e.preventDefault();
+                    closeDropdown();
+                    d.input.focus();
+                    break;
+                }
+              });
 
+              let blurTimer;
+              d.input.addEventListener('blur', () => {
+                blurTimer = setTimeout(() => {
+                  closeDropdown();
+                  if (d.input.value.trim() && Store.get('addrMethod') === 'manual') {
+                    d.input.style.borderColor = 'rgba(255,255,255,0.2)';
+                    d.hint.textContent = 'Address entered manually';
+                  }
+                }, 150);
+              });
+              d.input.addEventListener('focus', () => clearTimeout(blurTimer));
+
+              d.btnGPS.addEventListener('click', detectGPS);
+
+              document.addEventListener('click', (e) => {
+                if (!d.wrap.contains(e.target)) closeDropdown();
+              });
+            },
+            cancel: cancelOperations
+          };
+            
+          
+        })();
+
+        // Firebase service
+        const FirebaseService = {
+          async waitForInit() {
+            if (window.__firebaseReady) return;
+            return Promise.race([
+              new Promise(resolve => {
+                document.addEventListener('firebaseReady', () => resolve(), { once: true });
+              }),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('TIMEOUT')), CONFIG.FIREBASE_TIMEOUT)
+              )
+            ]);
+          },
+
+          async checkDuplicates(email, phone) {
+            const { collection, query, where, getDocs } = window.__firestore;
+            const db = window.__db;
+            const [emailSnap, phoneSnap] = await Promise.all([
+              getDocs(query(collection(db, 'registrations'), where('email', '==', email))),
+              getDocs(query(collection(db, 'registrations'), where('phone', '==', phone)))
+            ]);
+            return { emailExists: !emailSnap.empty, phoneExists: !phoneSnap.empty };
+          },
+
+          async saveRegistration(data) {
+            const { collection, addDoc } = window.__firestore;
+            const db = window.__db;
+            return addDoc(collection(db, 'registrations'), data);
+          }
+        };
+
+        async function handleSubmit(e) {
+          e.preventDefault();
+          if (Store.get('isSubmitting')) return;
+
+          const dom = DOM.get();
+          UI.clearErrors();
+
+          const fields = {
+            name: { el: dom.inputs.name, validator: Utils.validators.name, error: 'First name is required (letters only)' },
+            surname: { el: dom.inputs.surname, validator: Utils.validators.name, error: 'Surname is required (letters only)' },
+            age: { el: dom.inputs.age, validator: Utils.validators.age, error: 'Enter a valid age (13–120)' },
+            phone: { el: dom.inputs.phone, validator: Utils.validators.phone, error: 'Enter a valid phone number' },
+            email: { el: dom.inputs.email, validator: Utils.validators.email, error: 'Enter a valid email address' },
+            address: { el: dom.inputs.address, validator: Utils.validators.address, error: 'Address is required (min 5 chars)' }
+          };
+
+          const values = {};
+          let isValid = true;
+
+          for (const config of Object.values(fields)) {
+            const key = Object.keys(fields).find(k => fields[k] === config);
+            const value = config.el.value.trim();
+            values[key] = value;
+            if (!config.validator(value)) {
+              UI.setFieldError(config.el.id, config.error);
+              isValid = false;
+            }
+          }
+
+          if (!isValid) {
+            const firstInvalid = Object.values(fields).find(f => !f.validator(f.el.value.trim()));
+            if (firstInvalid) firstInvalid.el.focus();
+            return;
+          }
+
+          Store.set('isSubmitting', true);
+          UI.setSubmitLoading(true);
+
+          try {
+            await FirebaseService.waitForInit();
+
+
+
+            const gpsCoords = Store.get('gpsCoords');
+            const payload = {
+
+              name: Utils.escapeHtml(values.name),
+              surname: Utils.escapeHtml(values.surname),
+              age: parseInt(values.age, 10),
+              phone: Utils.normalizePhone(values.phone),
+              email: Utils.escapeHtml(values.email.toLowerCase()),
+              address: Utils.escapeHtml(values.address),
+              location: gpsCoords ? {
+                lat: gpsCoords.lat,
+                lng: gpsCoords.lng,
+                accuracy: gpsCoords.accuracy,
+                method: 'gps'
+              } : { method: Store.get('addrMethod') },
+              registeredAt: new Date().toISOString(),
+              source: 'website',
+              userAgent: navigator.userAgent,
+              language: navigator.language
+            };
+
+            await FirebaseService.saveRegistration(payload);
+
+            Utils.storage.set(CONFIG.STORAGE_KEY, 'true');
+            dom.thanksName.textContent = `Thank you, ${payload.name}! You've officially joined the DeTech movement.`;
+            UI.showStep('step-thanks');
+            UI.announce('Registration successful! Welcome to DeTech.', 'polite');
+
+          } catch (err) {
+            console.error('Registration error:', err);
+            const message = err && err.message === 'TIMEOUT'
+              ? 'Request timed out. Please check your connection and try again.'
+              : 'Something went wrong. Please check your connection and try again.';
+
+            dom.errors.form.textContent = message;
+            dom.errors.form.classList.remove('hidden');
+            UI.announce(message, 'assertive');
+          } finally {
+            Store.set('isSubmitting', false);
+            UI.setSubmitLoading(false);
+          }
+        }
+
+        function init() {
+          if (Utils.storage.get(CONFIG.STORAGE_KEY) === 'true') {
+            UI.showMain();
+            return;
+          }
+
+          document.body.style.overflow = 'hidden';
+          const dom = DOM.init();
+
+          dom.buttons.start.addEventListener('click', () => UI.showStep('step-form'));
+          dom.form.addEventListener('submit', handleSubmit);
+          dom.buttons.enter.addEventListener('click', UI.showMain);
+
+          AddressModule.init();
+
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && dom.steps.thanks.classList.contains('active')) UI.showMain();
+          });
+
+          dom.overlay.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            const focusable = Array.from(dom.overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+              .filter(el => !el.disabled && el.offsetParent !== null);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          });
+
+          global.__detechReady = true;
+          document.dispatchEvent(new CustomEvent('detechReady'));
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+
+      })(window, document);
+    })(window, document);
+  </script>
 </body>
 </html>
