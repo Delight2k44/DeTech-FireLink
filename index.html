@@ -883,9 +883,15 @@
         <div>
           <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs flex items-center gap-2"><span class="w-4 h-px bg-orange-500"></span>Stay Updated</h4>
           <p class="text-gray-400 text-sm mb-4">Get the latest updates on our prototype development and deployment.</p>
-          <form class="flex gap-2" onsubmit="event.preventDefault()">
-            <input type="email" placeholder="Enter your email" class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 transition-all duration-300">
-            <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors duration-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>
+          <form id="footer-subscribe-form" class="space-y-2" novalidate>
+            <div class="flex gap-2">
+              <input type="email" id="footer-sub-email" name="email" placeholder="Enter your email" autocomplete="email" class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 transition-all duration-300" required aria-describedby="footer-sub-msg">
+              <button type="submit" id="footer-sub-btn" class="bg-orange-600 hover:bg-orange-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center" style="min-width:42px;" aria-label="Subscribe">
+                <svg id="footer-sub-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <div id="footer-sub-spinner" class="spinner hidden"></div>
+              </button>
+            </div>
+            <p id="footer-sub-msg" class="text-xs hidden" role="status" aria-live="polite"></p>
           </form>
         </div>
       </div>
@@ -1287,6 +1293,10 @@
     async save(data) {
       const { collection, addDoc } = window.__firestore;
       return addDoc(collection(window.__db, 'registrations'), data);
+    },
+    async withTimeout(promise, ms = CONFIG.FIREBASE_TIMEOUT) {
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), ms));
+      return Promise.race([promise, timeout]);
     }
   };
 
@@ -1341,10 +1351,10 @@
         userAgent: navigator.userAgent,
         language:  navigator.language
       };
-      await Firebase.save(payload);
+      await Firebase.withTimeout(Firebase.save(payload));
       Utils.storage.set(CONFIG.STORAGE_KEY, 'true');
 
-      // Show thank-you step then redirect after 3s
+      // Show thank-you step, then dismiss the gate and reveal the main page
       dom.thanksName.textContent = `Thank you, ${payload.name}! You've officially joined the DeTech movement.`;
       UI.showStep('step-thanks');
 
@@ -1352,7 +1362,8 @@
       const bar = dom.redirectBar;
       if (bar) { requestAnimationFrame(() => { bar.style.width = '100%'; }); }
 
-      setTimeout(() => { window.location.href = 'OfflineSoon.html'; }, CONFIG.REDIRECT_DELAY);
+      // Reveal the main DeTech page instead of navigating away
+      setTimeout(() => { UI.showMain(); }, CONFIG.REDIRECT_DELAY);
 
     } catch(err) {
       console.error('Registration error:', err);
@@ -1366,6 +1377,92 @@
       UI.setSubmitLoading(false);
     }
   }
+
+  /* ── FOOTER NEWSLETTER SUBSCRIBE (same logic as ComingSoon.html) ── */
+  const FooterSubscribe = (() => {
+    let submitting = false;
+    function dom() {
+      return {
+        form:    document.getElementById('footer-subscribe-form'),
+        email:   document.getElementById('footer-sub-email'),
+        btn:     document.getElementById('footer-sub-btn'),
+        icon:    document.getElementById('footer-sub-icon'),
+        spinner: document.getElementById('footer-sub-spinner'),
+        msg:     document.getElementById('footer-sub-msg')
+      };
+    }
+    function setLoading(on) {
+      const d = dom();
+      d.btn.disabled = on;
+      d.icon.classList.toggle('hidden', on);
+      d.spinner.classList.toggle('hidden', !on);
+    }
+    function showMsg(text, type) {
+      const d = dom();
+      d.msg.textContent = text;
+      d.msg.classList.remove('hidden', 'text-red-400', 'text-green-400');
+      d.msg.classList.add(type === 'error' ? 'text-red-400' : 'text-green-400');
+    }
+    async function handleSubmit(e) {
+      e.preventDefault();
+      if (submitting) return;
+      const d = dom();
+      d.msg.classList.add('hidden');
+
+      const email = d.email.value.trim();
+      if (!Utils.validators.email(email)) {
+        showMsg('Please enter a valid email address.', 'error');
+        d.email.focus();
+        return;
+      }
+
+      submitting = true;
+      setLoading(true);
+
+      try {
+        await Firebase.waitForInit();
+        const { collection, addDoc, query, where, getDocs } = window.__firestore;
+        const db = window.__db;
+
+        const q = query(collection(db, 'subscribers'), where('email', '==', email));
+        const snapshot = await Firebase.withTimeout(getDocs(q));
+
+        if (!snapshot.empty) {
+          showMsg("You're already subscribed! 🚀", 'success');
+          d.email.value = '';
+          return;
+        }
+
+        await Firebase.withTimeout(addDoc(collection(db, 'subscribers'), {
+          email,
+          subscribedAt: new Date().toISOString(),
+          featurePage: 'index-footer'
+        }));
+
+        showMsg("You're subscribed! 🔥", 'success');
+        d.email.value = '';
+
+      } catch (err) {
+        console.error('Footer subscribe error:', err);
+        if (err && err.message === 'TIMEOUT') {
+          showMsg('Request timed out. Please try again.', 'error');
+        } else if (err && err.code === 'permission-denied') {
+          showMsg('Submission blocked. Contact admin@detechnologies.co.za', 'error');
+        } else {
+          showMsg('Something went wrong. Please try again.', 'error');
+        }
+      } finally {
+        submitting = false;
+        setLoading(false);
+      }
+    }
+    return {
+      init() {
+        const d = dom();
+        if (d.form) d.form.addEventListener('submit', handleSubmit);
+      }
+    };
+  })();
 
   /* ── SCROLL OBSERVERS ── */
   function initScrollObservers() {
@@ -1431,6 +1528,8 @@
     // If already registered → show main site directly
     if (Utils.storage.get(CONFIG.STORAGE_KEY) === 'true') {
       UI.showMain();
+      FooterSubscribe.init();
+      initMobileMenu();
       return;
     }
 
@@ -1440,6 +1539,7 @@
     dom.buttons.start.addEventListener('click', () => UI.showStep('step-form'));
     dom.form.addEventListener('submit', handleSubmit);
     AddressModule.init();
+    FooterSubscribe.init();
     initMobileMenu();
 
     // Focus trap inside overlay
